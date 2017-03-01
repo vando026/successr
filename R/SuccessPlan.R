@@ -14,12 +14,13 @@ sp_tfile <- file.path(sp_fname, "TimeSheet.csv")
 
 ##### Bring in the Data
 sp_getData <- function(sp_tfile) {
-  dat <- as.data.frame(read.csv(sp_tfile, header=FALSE))
+  dat <- as.data.frame(read.csv(sp_tfile, header=TRUE))
   colnames(dat) <- c("Time", "Task")
   dat <- transform(dat, Time=as.POSIXlt(Time, origin='1970-01-01') )
   dat$Date <- as.character(format(dat$Time,  "%Y-%m-%d"))
   return(dat)
 }
+sp_getData(sp_tfile)
 
 ##### Format Time 
 sp_fmt <- function(x) {
@@ -34,7 +35,7 @@ sp_fmt <- function(x) {
 
 
 ### Select days to backcalc
-Select <- function(dat, 
+sp_select <- function(dat, 
   days=eval.parent(quote(days))) {
   today <- as.Date(format(Sys.time(), "%Y-%m-%d"))
   dat <- transform(dat, Date=as.Date(Date))
@@ -42,8 +43,8 @@ Select <- function(dat,
   dat <- subset(dat, Date >= ds)
   dat
 }
-# debugonce(Select)
-# Select(dat, 0)
+# debugonce(sp_select)
+# sp_select(dat, 0)
 
 # Calc hours 
 calcTime <- function(dat, 
@@ -54,7 +55,7 @@ calcTime <- function(dat,
     hdat <- transform(dat, Hour=c(Hour, NA))
     out <- aggregate(Hour ~ Task + Date, hdat, sum, na.action=na.omit)
     out <- out[out$Task!="Stop", ]
-    out <- Select(out, days)
+    out <- sp_select(out, days)
     out <- transform(out, HourF=sp_fmt(Hour))
     out <- transform(out, HourP=round((Hour/(sum(Hour)))*100, 1))
     out <- as.data.frame(out)
@@ -62,7 +63,7 @@ calcTime <- function(dat,
 }
 # calcTime(dat, 0)
 
-calcTimeDF <- function(sp_tfile, days=7, sp_fmt=TRUE) {
+calcTimeDF <- function(sp_tfile, days=6, sp_fmt=TRUE) {
   dat <- sp_getData(sp_tfile)
   dat <- calcTime(dat, days) 
   dat <- subset(dat, Task != "wt")
@@ -78,24 +79,18 @@ calcTimeDF <- function(sp_tfile, days=7, sp_fmt=TRUE) {
 # qp_DF <- calcTimeDF(sp_tfile, 7, sp_fmt=FALSE)
 
 weekPlot <- function(sp_tfile, days=31) {
-  cur_mnth <- format(Sys.time(), "%m-%Y")
   dat <- calcTimeDF(sp_tfile, days, sp_fmt=FALSE)
   dat <- transform(dat, Date=as.Date(Date, origin="1970-01-01"))
-  dat <- subset(dat, format(Date, "%m-%Y")==cur_mnth)
-  dat <- transform(dat, Day=as.numeric(format(Date, "%d")))
-  dat <- transform(dat, Week=cut(Day, 
-    include.lowest=TRUE, breaks=seq(0, days, 7),
-    labels=paste0("Week", 1:4)))
-  if (nrow(dat)!=0) {
-    dat <- aggregate(Hour ~ Week, data=dat, sum)
-  } else {
-    dat <- data.frame(Week=paste0("Week", 1:4), Hour=rep(0, 4)) 
-  }
+  dat <- transform(dat, Week=as.numeric(format(Date, "%U")))
+  maxWk <- max(dat$Week)
+  dat <- subset(dat, Week %in% c((maxWk-3):maxWk))
+  dat <- aggregate(Hour ~ Week, data=dat, sum)
   dat <- transform(dat, HourF=sp_fmt(Hour))
+  dat <- transform(dat, Week=paste0("Week", Week))
   dat
 }
 # debugonce(weekPlot)
-# tt <- weekPlot(sp_tfile)
+tt <- weekPlot(sp_tfile)
 
 doPlot <- function(sp_tfile) {
   tt <- weekPlot(sp_tfile)
@@ -110,6 +105,18 @@ doPlot <- function(sp_tfile) {
   f
 }
 # doPlot(sp_tfile)
+
+
+dumpData <- function(sp_tfile) {
+    dat <- sp_getData(sp_tfile)
+    dat <- sp_select(dat, 31)
+    write.csv(dat[, c("Time", "Task")], 
+      file=sp_tfile,
+      row.names=FALSE, quote=FALSE) 
+}
+# debugonce(dumpData)
+# dumpData(sp_tfile)
+
 
 
 doButton <- function(x, days=0) {
