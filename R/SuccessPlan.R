@@ -15,12 +15,12 @@ sp_tfile <- file.path(sp_fname, "TimeSheet.csv")
 ##### Bring in the Data
 sp_getData <- function(sp_tfile) {
   dat <- as.data.frame(read.csv(sp_tfile, header=TRUE))
-  colnames(dat) <- c("Time", "Task")
+  # colnames(dat) <- c("Time", "Task")
   dat <- transform(dat, Time=as.POSIXlt(Time, origin='1970-01-01') )
   dat$Date <- as.character(format(dat$Time,  "%Y-%m-%d"))
   return(dat)
 }
-sp_getData(sp_tfile)
+# sp_getData(sp_tfile)
 
 ##### Format Time 
 sp_fmt <- function(x) {
@@ -90,7 +90,7 @@ weekPlot <- function(sp_tfile, days=31) {
   dat
 }
 # debugonce(weekPlot)
-tt <- weekPlot(sp_tfile)
+# tt <- weekPlot(sp_tfile)
 
 doPlot <- function(sp_tfile) {
   tt <- weekPlot(sp_tfile)
@@ -112,7 +112,8 @@ dumpData <- function(sp_tfile) {
     dat <- sp_select(dat, 31)
     write.csv(dat[, c("Time", "Task")], 
       file=sp_tfile,
-      row.names=FALSE, quote=FALSE) 
+      row.names=FALSE,
+      quote=FALSE) 
 }
 # debugonce(dumpData)
 # dumpData(sp_tfile)
@@ -234,6 +235,8 @@ sp_gr <- ggroup(cont=out0, horizontal=TRUE, spacing=0)
 img <- doPlot(sp_tfile) 
 img_out <- gimage(basename(img),dirname(img), cont = out0 )
 
+# Trim data
+dumpData(sp_tfile)
 
 svalue(notebook) <- 1
 visible(window) <- TRUE
