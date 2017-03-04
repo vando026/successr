@@ -33,62 +33,59 @@ sp_fmt <- function(x) {
 ### Select days to backcalc
 sp_select <- function(dat, 
   days=eval.parent(quote(days))) {
-  today <- as.Date(format(Sys.time(), "%Y-%m-%d"))
-  dat <- transform(dat, Date=as.Date(Date))
-  ds <- today - days
-  dat <- subset(dat, Date >= ds)
+  ds <- as.Date(Sys.time()) - days
+  dat <- subset(dat, as.Date(Time) > ds)
   dat
 }
 # debugonce(sp_select)
-sp_select(spData, 0)
+sp_select(spData, 2)
 
 # Calc hours 
 calcTime <- function(dat, 
     days=eval.parent(quote(days))) {
-    # dat <- sp_getData(sp_tfile)
+    dat <- sp_select(dat, days)
     Seconds <- as.numeric(dat$Time)
     Hour <- round(diff(Seconds)/(60*60), 2)
-    hdat <- transform(dat, Hour=c(Hour, NA))
-    out <- aggregate(Hour ~ Task + Date, hdat, sum, na.action=na.omit)
-    out <- out[out$Task!="Stop", ]
-    out <- sp_select(out, days)
-    out <- transform(out, HourF=sp_fmt(Hour))
-    out <- transform(out, HourP=round((Hour/(sum(Hour)))*100, 1))
-    out <- as.data.frame(out)
-    return(out)
+    dat <- transform(dat, Hour=c(Hour, NA),
+      Date=as.Date(Time))
+    dat <- aggregate(Hour ~ Task + Date, dat, sum, na.action=na.omit)
+    dat <- dat[dat$Task!="Stop", ]
+    dat <- transform(dat, HourF=sp_fmt(Hour))
+    dat <- transform(dat, HourP=round((Hour/(sum(Hour)))*100, 1))
+    as.data.frame(dat)
 }
-calcTime(mdat, 0)
+# debugonce(calcTime)
+calcTime(spData, 1)
 
-calcTimeDF <- function(dat, days=6, sp_fmt=TRUE) {
+calcWeek <- function(dat, days=7, sp_fmt=TRUE) {
   dat <- calcTime(dat, days) 
   dat <- subset(dat, Task != "wt")
-  wkday <- aggregate(Hour ~ Date, dat, sum, na.action=na.omit)
+  dat <- aggregate(Hour ~ Date, dat, sum, na.action=na.omit)
   if (sp_fmt==TRUE)
-    wkday <- transform(wkday, Hour=sp_fmt(Hour))
-  wkday <- transform(wkday, Day = format(Date, "%a"))
-  wkday <- transform(wkday, Date=as.character(Date))
-  wkday <- as.data.frame(wkday[, c("Date", "Day", "Hour")])
-  wkday
-}
-# debugonce(calcTimeDF)
-# qp_DF <- calcTimeDF(sp_tfile, 7, sp_fmt=FALSE)
-
-weekPlot <- function(dat, days=31) {
-  dat <- calcTimeDF(dat, days, sp_fmt=FALSE)
-  dat <- transform(dat, Date=as.Date(Date, origin="1970-01-01"))
-  dat <- transform(dat, Week=as.numeric(format(Date, "%U")))
-  maxWk <- max(dat$Week)
-  dat <- subset(dat, Week %in% c((maxWk-3):maxWk))
-  dat <- aggregate(Hour ~ Week, data=dat, sum)
-  dat <- transform(dat, HourF=sp_fmt(Hour))
-  dat <- transform(dat, Week=paste0("Week", Week))
+    dat <- transform(dat, Hour=sp_fmt(Hour))
+  dat <- transform(dat, Day = format(Date, "%a"))
+  dat <- transform(dat, Week=paste0("Week",
+    as.numeric(format(Date, "%U"))))
+  dat <- as.data.frame(dat[, c("Date", "Week", "Day", "Hour")])
   dat
 }
-# debugonce(weekPlot)
-# tt <- weekPlot(sp_tfile)
+# debugonce(calcWeek)
+# qp_DF <- calcWeek(spData, 7, sp_fmt=FALSE)
+
+calcMonth <- function(dat, days=31) {
+  dat <- calcWeek(dat, days, sp_fmt=FALSE)
+  dat <- transform(dat, Wk=as.numeric(format(Date, "%U")))
+  maxWk <- max(dat$Wk)
+  dat <- subset(dat, Wk %in% c((maxWk-3):maxWk))
+  dat <- aggregate(Hour ~ Week, data=dat, sum)
+  dat <- transform(dat, HourF=sp_fmt(Hour))
+  dat
+}
+# debugonce(calcMonth)
+tt <- calcMonth(spData)
 
 doPlot <- function(sp_tfile) {
-  tt <- weekPlot(sp_tfile)
+  tt <- calcMonth(sp_tfile)
   f <- tempfile( )
   png(f, units="in",
        width=3.6, height=1.8, pointsize=8, res=100, type="cairo")
@@ -157,7 +154,7 @@ gEditButton <- function() {
 }
 
 lastWkUpdate <- function(sp_tfile) {
-  sp_DF <- calcTimeDF(sp_tfile)
+  sp_DF <- calcWeek(sp_tfile)
   sp_o1[] <- sp_DF
   svalue(img_out) <- doPlot(sp_tfile)
   svalue(notebook) <- 2
@@ -221,7 +218,7 @@ sp_out <- ggroup(label='Last Week', horizontal=TRUE,
   spacing=10, cont=notebook)
 out0 <- ggroup(horizontal=TRUE, cont=sp_out)
 doButton("wt", days=0)
-sp_DF <- calcTimeDF(sp_tfile, sp_fmt=TRUE)
+sp_DF <- calcWeek(sp_tfile, sp_fmt=TRUE)
 sp_o1 <- gtable(sp_DF, cont = out0, expand=FALSE)
 size(sp_o1) <- list(width=200, height=220, column.widths=c(100, 50, 50))
 
