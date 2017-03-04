@@ -10,17 +10,13 @@ options (guiToolkit="RGtk2" )
 # Files
 sp_fname<- file.path(Sys.getenv("USERPROFILE"), "Dropbox/R/SuccessPlan")
 sp_tfile <- file.path(sp_fname, "TimeSheet.csv")
-
+sp_rfile <- file.path(sp_fname, "TimeSheet.Rdata")
+# spData<- as.data.frame(read.csv(sp_tfile, header=TRUE))
+# spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01') )
+# save("spData", file=sp_rfile)
 
 ##### Bring in the Data
-sp_getData <- function(sp_tfile) {
-  dat <- as.data.frame(read.csv(sp_tfile, header=TRUE))
-  # colnames(dat) <- c("Time", "Task")
-  dat <- transform(dat, Time=as.POSIXlt(Time, origin='1970-01-01') )
-  dat$Date <- as.character(format(dat$Time,  "%Y-%m-%d"))
-  return(dat)
-}
-# sp_getData(sp_tfile)
+load(sp_rfile)
 
 ##### Format Time 
 sp_fmt <- function(x) {
@@ -44,12 +40,12 @@ sp_select <- function(dat,
   dat
 }
 # debugonce(sp_select)
-# sp_select(dat, 0)
+sp_select(spData, 0)
 
 # Calc hours 
 calcTime <- function(dat, 
     days=eval.parent(quote(days))) {
-    dat <- sp_getData(sp_tfile)
+    # dat <- sp_getData(sp_tfile)
     Seconds <- as.numeric(dat$Time)
     Hour <- round(diff(Seconds)/(60*60), 2)
     hdat <- transform(dat, Hour=c(Hour, NA))
@@ -61,10 +57,9 @@ calcTime <- function(dat,
     out <- as.data.frame(out)
     return(out)
 }
-# calcTime(dat, 0)
+calcTime(mdat, 0)
 
-calcTimeDF <- function(sp_tfile, days=6, sp_fmt=TRUE) {
-  dat <- sp_getData(sp_tfile)
+calcTimeDF <- function(dat, days=6, sp_fmt=TRUE) {
   dat <- calcTime(dat, days) 
   dat <- subset(dat, Task != "wt")
   wkday <- aggregate(Hour ~ Date, dat, sum, na.action=na.omit)
@@ -78,8 +73,8 @@ calcTimeDF <- function(sp_tfile, days=6, sp_fmt=TRUE) {
 # debugonce(calcTimeDF)
 # qp_DF <- calcTimeDF(sp_tfile, 7, sp_fmt=FALSE)
 
-weekPlot <- function(sp_tfile, days=31) {
-  dat <- calcTimeDF(sp_tfile, days, sp_fmt=FALSE)
+weekPlot <- function(dat, days=31) {
+  dat <- calcTimeDF(dat, days, sp_fmt=FALSE)
   dat <- transform(dat, Date=as.Date(Date, origin="1970-01-01"))
   dat <- transform(dat, Week=as.numeric(format(Date, "%U")))
   maxWk <- max(dat$Week)
