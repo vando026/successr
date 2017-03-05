@@ -113,22 +113,16 @@ doPlot <- function(spDayData) {
 
 
 doButton <- function(x) {
-  All <- c("proj1", "proj2", "wt")
-  other <- setdiff(All, x)
+browser()
+  xn <- as.name(x)
+  All <- c(proj1, proj2, wt)
+  other <- setdiff(All, xn)
   dflt <- list(weight="normal", size=10, color="black")
   Act <- list(weight="bold", size=12, color="red")
-  A1 <- get(x, envir=environment())
-  N1 <- get(other[1], envir=environment())
-  N2 <- get(other[2], envir=environment())
-  font(A1) <- Act
-  font(N1)<- dflt
-  font(N2)<- dflt
-  if (x=="Stop") {
-    font(Stop) <- dflt
-    font(proj1)<- dflt
-    font(proj2) <-dflt
-    font(wt)<- dflt
-  }
+  font(xn) <- Act
+  sapply(other, function(i) font(i) <- dflt)
+  if (x=="Stop") 
+    sapply(All, function(i) font(i) <- dflt)
   
   ### Update GUI
   updateData <- function(out) {
@@ -178,7 +172,6 @@ window <- gwindow("The Ultimate Success Plan",
 
 # This makes the tabs
 notebook <- gnotebook (cont = window )
-
 sp_g0 <- ggroup(label='Main', horizontal=TRUE, spacing=10, cont=notebook)
 
 
@@ -186,43 +179,66 @@ sp_f0 <- ggroup(horizontal=FALSE, spacing=0, cont=sp_g0)
 sp_f1 <- ggroup(horizontal=TRUE, expand=TRUE, fill='x', 
   spacing=10, cont=sp_g0)
 
-sp_g1 <- ggroup(horizontal = FALSE, expand=TRUE, fill='x', spacing=5,  cont = sp_f1)
-addSpace(sp_g1, 5)
-proj1 <- gbutton("Project 1", cont = sp_g1, expand=TRUE, fill='y',
-  handler=function(h, ...) doButton("proj1")) 
-size(sp_g1) <- c(70, 100)
-sep <- gseparator(cont=sp_g1)
-outP1 <- glabel("", cont=sp_g1)
-addSpace(sp_g1, 5)
+ggList <- list(horizontal = FALSE, spacing=5, 
+  expand=TRUE, fill='x', cont = sp_f1)
+ggNames <- paste0("sp_g", c(1:3))
+for(i in ggNames) {
+  assign(i, do.call("ggroup", ggList))
+}
 
-sp_g2 <- ggroup(horizontal = FALSE, spacing=5, expand=TRUE, fill='x', cont = sp_f1)
-addSpace(sp_g2, 5)
-proj2 <- gbutton("Project 2", cont = sp_g2, expand=TRUE, fill='y',
-  handler=function(h, ...) doButton("proj2"))
-size(sp_g2) <- c(70, 100)
-sep <- gseparator(cont=sp_g2)
-outP2 <- glabel("", cont=sp_g2)
-addSpace(sp_g2, 5)
+sapply(ggNames, function(i) {
+  i <- get(i, envir=environment())
+  print(i)
+})
 
-sp_g3 <- ggroup(horizontal = FALSE, spacing=5, expand=TRUE, fill='x',  cont = sp_f1)
-addSpace(sp_g3, 5)
-wt <- gbutton("Wasted Time", cont= sp_g3, expand=TRUE, fill='y',
-  handler=function(h, ...) doButton("wt")) 
-size(sp_g3) <- c(70, 100)
-sep <- gseparator(cont=sp_g3)
-outWT <- glabel("", cont=sp_g3)
-addSpace(sp_g3, 5)
+doButtonList <- list()
+doButtonList[["P1"]] <- gbutton("Project 1", cont=sp_g1, expand=TRUE, fill="y")
+doButtonList[["P2"]] <- gbutton("Project 2", cont=sp_g2, expand=TRUE, fill="y")
+doButtonList[["WT"]] <- gbutton("Wasted Time", cont=sp_g3, expand=TRUE, fill="y")
 
-sp_f2 <- ggroup(horizontal=FALSE, spacing=8, cont=sp_g0)
-addSpace(sp_f2, 3)
-Stop <- gbutton("Stop", cont=sp_f2, expand=TRUE, fill='y',
-  handler=function(h, ...) doButton("Stop"))
-r_act <- gaction("Report", icon="overview", handler=function(...) lastWkUpdate(sp_tfile))
-rweek <- gbutton(action=r_act, cont=sp_f2, expand=TRUE, fill='y')
-e_act <- gaction("Edit", icon="editor", handler=function(...) gEditButton())
-Edit <- gbutton(action=e_act, cont=sp_f2, expand=TRUE, fill='y')
-addSpace(sp_f2, 1.3)
-f3 <- ggroup(horizontal=FALSE, spacing=10, cont=sp_g0)
+doButton <- function(h, ...) {
+  nn <- svalue(h$obj)
+  print(nn)
+}
+sapply(doButtonList, addHandlerChanged, handler = doButton)
+
+
+# addSpace(sp_g1, 5)
+# sp_g1
+# doButtonList$P1
+# size(sp_g1) <- c(70, 100)
+# sep <- gseparator(cont=sp_g1)
+# outP1 <- glabel("", cont=sp_g1)
+# addSpace(sp_g1, 5)
+
+# sp_g2 <- ggroup(horizontal = FALSE, spacing=5, expand=TRUE, fill='x', cont = sp_f1)
+# addSpace(sp_g2, 5)
+# proj2 <- gbutton("Project 2", cont = sp_g2, expand=TRUE, fill='y',
+#   handler=function(h, ...) doButton("proj2"))
+# size(sp_g2) <- c(70, 100)
+# sep <- gseparator(cont=sp_g2)
+# outP2 <- glabel("", cont=sp_g2)
+# addSpace(sp_g2, 5)
+
+# sp_g3 <- ggroup(horizontal = FALSE, spacing=5, expand=TRUE, fill='x',  cont = sp_f1)
+# addSpace(sp_g3, 5)
+# wt <- gbutton("Wasted Time", cont= sp_g3, expand=TRUE, fill='y',
+#   handler=function(h, ...) doButton("wt")) 
+# size(sp_g3) <- c(70, 100)
+# sep <- gseparator(cont=sp_g3)
+# outWT <- glabel("", cont=sp_g3)
+# addSpace(sp_g3, 5)
+
+# sp_f2 <- ggroup(horizontal=FALSE, spacing=8, cont=sp_g0)
+# addSpace(sp_f2, 3)
+# Stop <- gbutton("Stop", cont=sp_f2, expand=TRUE, fill='y',
+#   handler=function(h, ...) doButton("Stop"))
+# r_act <- gaction("Report", icon="overview", handler=function(...) lastWkUpdate(sp_tfile))
+# rweek <- gbutton(action=r_act, cont=sp_f2, expand=TRUE, fill='y')
+# e_act <- gaction("Edit", icon="editor", handler=function(...) gEditButton())
+# Edit <- gbutton(action=e_act, cont=sp_f2, expand=TRUE, fill='y')
+# addSpace(sp_f2, 1.3)
+# f3 <- ggroup(horizontal=FALSE, spacing=10, cont=sp_g0)
 
 
 # addHandlerChanged(e_act, handler = function(h ,...) {
