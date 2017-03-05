@@ -12,6 +12,10 @@ sp_fname<- file.path(Sys.getenv("USERPROFILE"), "Dropbox/R/SuccessPlan")
 sp_tfile <- file.path(sp_fname, "TimeSheet.csv")
 sp_rfile <- file.path(sp_fname, "TimeSheet.Rdata")
 
+spData <- read.csv(sp_tfile, header=TRUE)
+spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01') )
+
+
 ##### Bring in the Data
 load(sp_rfile)
 
@@ -40,8 +44,8 @@ calcTime <- function(dat) {
     dat <- transform(dat, HourP=round((Hour/(sum(Hour)))*100, 1))
     as.data.frame(dat)
 }
-# debugonce(calcTime)
-# tt=calcTime(spData)
+debugonce(calcTime)
+tt=calcTime(spData)
 
 writeDay <- function(dat, spDayData) {
   today <- as.Date(Sys.time()) 
@@ -113,37 +117,51 @@ doPlot <- function(spDayData) {
 
 
 doButton <- function(h, ...) {
-  print(h)
-  return(h)
-  if(x==ggLabels[1] )
-  other <- setdiff(ggLabels, x)
+# browser()
+  other <- setdiff(paste0(ggNames, "B"), h$action)
   dflt <- list(weight="normal", size=10, color="black")
   Act <- list(weight="bold", size=12, color="red")
-  font(xn) <- Act
-  sapply(other, function(i) font(i) <- dflt)
-  if (x=="Stop") 
-    sapply(All, function(i) font(i) <- dflt)
-  
-  ### Update GUI
-  updateData <- function(out) {
-    svalue(outP1) <- paste0(out[out$Task=="proj1", "HourF"], " Hrs (", 
-      out[out$Task=="proj1", "HourP"], "%)")
-    svalue(outP2) <- paste0(out[out$Task=="proj2", "HourF"], " Hrs (",
-      out[out$Task=="proj2", "HourP"], "%)")
-    svalue(outWT) <- paste0(out[out$Task=="wt", "HourF"], " Hrs (",
-      out[out$Task=="wt", "HourP"], "%)")
+  if (h$action=="Stop") {
+    font(h$obj) <- dflt
+  } else {
+    font(h$obj) <- Act
+    for(i in other) {
+      ii <- get(i, envir=globalenv())
+      font(ii) <- dflt
+    }
+  } 
+
+  getLab <- function(out, gLabel) {
+    out <- subset(out, Task==gLabel)
+    out <- lapply(out, as.character)
+    paste0(out["HourF"], " Hrs (", out["HourP"] , "%)")
   }
 
-  # Run functions
-  load(sp_rfile)
-  aLine <- c(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), x)
-  spData <- rbind(spData, aLine)
-  cdat <- calcTime(spData)
-  updateData(cdat)
-  spDayData <- writeDay(cdat, spDayData)
-  print(tail(spData))
-  print(tail(spDayData))
-  save(list=c("spData", "spDayData"), file=sp_rfile)
+  svalue(P1L) <- getLab(tt, "proj1")
+  svalue(P2L) <- getLab(tt, "proj2")
+  svalue(P3L) <- getLab(tt, "proj2")
+
+  # ### Update GUI
+  # updateData <- function(out) {
+  #   svalue(outP1) <- paste0(out[out$Task=="proj1", "HourF"], " Hrs (", 
+  #     out[out$Task=="proj1", "HourP"], "%)")
+  #   svalue(outP2) <- paste0(out[out$Task=="proj2", "HourF"], " Hrs (",
+  #     out[out$Task=="proj2", "HourP"], "%)")
+  #   svalue(outWT) <- paste0(out[out$Task=="wt", "HourF"], " Hrs (",
+  #     out[out$Task=="wt", "HourP"], "%)")
+  # }
+
+  # # Run functions
+  # load(sp_rfile)
+  # aLine <- c(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), x)
+  # spData <- rbind(spData, aLine)
+  # cdat <- calcTime(spData)
+  # updateData(cdat)
+  # spDayData <- writeDay(cdat, spDayData)
+  # print(tail(spData))
+  # print(tail(spDayData))
+  # save(list=c("spData", "spDayData"), file=sp_rfile)
+
 }
 
 gEditButton <- function() {
@@ -185,22 +203,23 @@ ggList <- list(horizontal = FALSE, spacing=5,
 
 # Iterate through names
 ggNames <- paste0("P", 1:3 )
-ggLabels <- list(P1="Project 1", P2 = "Project 2", P3="Wasted Time")
+ggLabels <- c(paste("Project",1:2), "Wasted Time")
 doButtonList <- list()
 
 # Now do all settings for buttons
 for(i in seq(3)) {
   assign(paste0(ggNames[i],"G"), 
     do.call("ggroup", ggList))
-  bi <- get(ggNames[i], envir=environment())
-  doButtonList[[ggNames[i]]] <-
-    gbutton(ggLabels[[i]], cont=bi, expand=TRUE, fill="y")
-  addHandlerChanged(bi, handler=doButton)
-  size(bi) <- c(70, 100)
-  sep <- gseparator(cont=bi)
+  gi <- get(paste0(ggNames[i],"G"), envir=environment())
+  assign(paste0(ggNames[i],"B"),
+    gbutton(ggLabels[i], cont=gi, expand=TRUE, fill="y"))
+  bi <- get(paste0(ggNames[i],"B"), envir=environment())
+  addHandlerChanged(bi, handler=doButton, action=paste0(ggNames[i],"B"))
+  size(gi) <- c(70, 100)
+  sep <- gseparator(cont=gi)
   assign(paste0(ggNames[i],"L"), 
-    glabel("", cont=bi))
-  addSpace(bi, 5)
+    glabel("", cont=gi))
+  addSpace(gi, 5)
 }
 
 ###############################################################################################
