@@ -112,11 +112,11 @@ doPlot <- function(spDayData) {
 # doPlot(spDayData)
 
 
-doButton <- function(x) {
-browser()
-  xn <- as.name(x)
-  All <- c(proj1, proj2, wt)
-  other <- setdiff(All, xn)
+doButton <- function(h, ...) {
+  print(h)
+  return(h)
+  if(x==ggLabels[1] )
+  other <- setdiff(ggLabels, x)
   dflt <- list(weight="normal", size=10, color="black")
   Act <- list(weight="bold", size=12, color="red")
   font(xn) <- Act
@@ -165,7 +165,7 @@ lastWkUpdate <- function(spDayData) {
 }
 
 ###############################################################################################
-######################################## GUI ##################################################
+######################################## LAYOUT ###############################################
 ###############################################################################################
 window <- gwindow("The Ultimate Success Plan", 
   width=620, height=230, visible=FALSE)
@@ -179,36 +179,41 @@ sp_f0 <- ggroup(horizontal=FALSE, spacing=0, cont=sp_g0)
 sp_f1 <- ggroup(horizontal=TRUE, expand=TRUE, fill='x', 
   spacing=10, cont=sp_g0)
 
+# Set the paramaters of the ggGroups
 ggList <- list(horizontal = FALSE, spacing=5, 
   expand=TRUE, fill='x', cont = sp_f1)
-ggNames <- paste0("sp_g", c(1:3))
-for(i in ggNames) {
-  assign(i, do.call("ggroup", ggList))
-}
 
-sapply(ggNames, function(i) {
-  i <- get(i, envir=environment())
-  print(i)
-})
-
+# Iterate through names
+ggNames <- paste0("P", 1:3 )
+ggLabels <- list(P1="Project 1", P2 = "Project 2", P3="Wasted Time")
 doButtonList <- list()
-doButtonList[["P1"]] <- gbutton("Project 1", cont=sp_g1, expand=TRUE, fill="y")
-doButtonList[["P2"]] <- gbutton("Project 2", cont=sp_g2, expand=TRUE, fill="y")
-doButtonList[["WT"]] <- gbutton("Wasted Time", cont=sp_g3, expand=TRUE, fill="y")
 
-doButton <- function(h, ...) {
-  nn <- svalue(h$obj)
-  print(nn)
+# Now do all settings for buttons
+for(i in seq(3)) {
+  assign(paste0(ggNames[i],"G"), 
+    do.call("ggroup", ggList))
+  bi <- get(ggNames[i], envir=environment())
+  doButtonList[[ggNames[i]]] <-
+    gbutton(ggLabels[[i]], cont=bi, expand=TRUE, fill="y")
+  addHandlerChanged(bi, handler=doButton)
+  size(bi) <- c(70, 100)
+  sep <- gseparator(cont=bi)
+  assign(paste0(ggNames[i],"L"), 
+    glabel("", cont=bi))
+  addSpace(bi, 5)
 }
-sapply(doButtonList, addHandlerChanged, handler = doButton)
 
+###############################################################################################
+######################################## HANDLERS #############################################
+###############################################################################################
+# sapply(c(1:3), function(x)
+  # addHandlerChanged(, handler = doButton, action=list(doName="Yes")))
 
 # addSpace(sp_g1, 5)
 # sp_g1
 # doButtonList$P1
 # size(sp_g1) <- c(70, 100)
 # sep <- gseparator(cont=sp_g1)
-# outP1 <- glabel("", cont=sp_g1)
 # addSpace(sp_g1, 5)
 
 # sp_g2 <- ggroup(horizontal = FALSE, spacing=5, expand=TRUE, fill='x', cont = sp_f1)
@@ -238,21 +243,12 @@ sapply(doButtonList, addHandlerChanged, handler = doButton)
 # e_act <- gaction("Edit", icon="editor", handler=function(...) gEditButton())
 # Edit <- gbutton(action=e_act, cont=sp_f2, expand=TRUE, fill='y')
 # addSpace(sp_f2, 1.3)
-# f3 <- ggroup(horizontal=FALSE, spacing=10, cont=sp_g0)
+f3 <- ggroup(horizontal=FALSE, spacing=10, cont=sp_g0)
 
 
 # addHandlerChanged(e_act, handler = function(h ,...) {
 #   print("YESSSS")
 # })
-
-# pattern <- glob2rx ( svalue ( txt_pattern ) )
-# file_names <- dir ( svalue ( start_dir ) , pattern , recursive=TRUE )
-# if ( length ( file_names ) )
-# svalue ( search_results ) <- file_names
-# else
-# galert ( "No matching files found" , parent = window )
-# } )
-
 
 # sp_out <- ggroup(label='Last Week', horizontal=TRUE, 
 #   spacing=10, cont=notebook)
