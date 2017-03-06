@@ -12,8 +12,8 @@ sp_fname<- file.path(Sys.getenv("USERPROFILE"), "Dropbox/R/SuccessPlan")
 sp_tfile <- file.path(sp_fname, "TimeSheet.csv")
 sp_rfile <- file.path(sp_fname, "TimeSheet.Rdata")
 
-spData <- read.csv(sp_tfile, header=TRUE)
-spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01') )
+# spData <- read.csv(sp_tfile, header=TRUE)
+# spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01') )
 
 
 ##### Bring in the Data
@@ -21,14 +21,13 @@ load(sp_rfile)
 
 ##### Format Time 
 sp_fmt <- function(x) {
-  if(is.numeric(x)==FALSE) stop("Must be numeric")
   fhour <- x %/% 1
   fmin <- round((x %% 1)*0.6, 2) 
   fmin <- sub("(\\d+).(\\d+)", "\\2", format(fmin, nsmall=2))
   out <- paste(fhour, fmin, sep=':')
-  out
+  ifelse(is.na(x), "0:00", as.character(out))
 }
-# sp_fmt(2.5)
+# x=sp_fmt(c(0, 0))
 
 # Calc hours 
 calcTime <- function(dat) {
@@ -39,9 +38,9 @@ calcTime <- function(dat) {
     dat <- transform(dat, Hour=c(Hour, NA),
       Date=as.Date(Time))
     dat <- aggregate(Hour ~ Task + Date, dat, sum, na.action=na.omit)
-    dat <- dat[dat$Task!="Stop", ]
-    dat <- transform(dat, HourF=sp_fmt(Hour))
+    dat <- dat[dat$Task!="ST", ]
     dat <- transform(dat, HourP=round((Hour/(sum(Hour)))*100, 1))
+    # dat <- transform(dat, Task = as.character(Task))
     as.data.frame(dat)
 }
 # debugonce(calcTime)
@@ -49,7 +48,7 @@ calcTime <- function(dat) {
 
 writeDay <- function(dat, spDayData) {
   today <- as.Date(Sys.time()) 
-  dat <- subset(dat, !(Task %in% c("wt", "Stop")))
+  dat <- subset(dat, !(Task %in% c("WT", "ST")))
   dat <- aggregate(Hour ~ Date, dat, sum, na.action=na.omit)
   if(any(today %in% spDayData$Date)) {
     spDayData$Hour[spDayData$Date==today] <- dat$Hour
@@ -86,7 +85,7 @@ calcWeek <- function(dat, sp_fmt=TRUE) {
   dat
 }
 # debugonce(calcWeek)
-# qp_DF <- calcWeek(spDayData, sp_fmt=FALSE)
+# spDayData <- calcWeek(spDay, sp_fmt=FALSE)
 
 calcMonth <- function(dat) {
   dat <- sp_select(dat, 31)
@@ -117,11 +116,10 @@ doPlot <- function(spDayData) {
 
 
 doButton <- function(h, ...) {
-browser()
   other <- setdiff(paste0(ggNames, "B"), h$action)
   dflt <- list(weight="normal", size=10, color="black")
   Act <- list(weight="bold", size=12, color="red")
-  if (h$action=="Stop") {
+  if (h$action=="ST") {
     font(h$obj) <- dflt
   } else {
     font(h$obj) <- Act
@@ -133,34 +131,31 @@ browser()
 
   getLab <- function(out, gLabel) {
     out <- subset(out, Task==gLabel)
-    paste0(out["HourF"], " Hrs (", out["HourP"] , "%)")
+    if(nrow(out)==0) {
+      Hour=sp_fmt(0); HourP="0" 
+    } else {
+      Hour=sp_fmt(out["Hour"]); HourP=out["HourP"]
+    }
+    paste0(Hour,"Hrs (",HourP,"%)")
   }
 
-  # svalue(P1L) <- getLab(tt, "proj1")
-  # svalue(P2L) <- getLab(tt, "proj2")
-  # svalue(P3L) <- getLab(tt, "proj2")
+  updateData <- function(out) {
+    for(i in seq(3)) {
+      ii <- get(paste0(ggNames[i],"L"), envir=globalenv()) 
+      svalue(ii) <- getLab(out, ggNames[i])
+    }
+  }
+  cdat <- calcTime(spData)
+  updateData(cdat)
+  spDayData <- writeDay(cdat, spDayData)
 
-  # ### Update GUI
-  # updateData <- function(out) {
-  #   svalue(outP1) <- paste0(out[out$Task=="proj1", "HourF"], " Hrs (", 
-  #     out[out$Task=="proj1", "HourP"], "%)")
-  #   svalue(outP2) <- paste0(out[out$Task=="proj2", "HourF"], " Hrs (",
-  #     out[out$Task=="proj2", "HourP"], "%)")
-  #   svalue(outWT) <- paste0(out[out$Task=="wt", "HourF"], " Hrs (",
-  #     out[out$Task=="wt", "HourP"], "%)")
-  # }
-
-  # # Run functions
-  # load(sp_rfile)
-  # aLine <- c(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), x)
-  # spData <- rbind(spData, aLine)
-  # cdat <- calcTime(spData)
-  # updateData(cdat)
-  # spDayData <- writeDay(cdat, spDayData)
+  load(sp_rfile)
+  aLine <- c(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), 
+    substr(h$action,1,2))
+  spData <- rbind(spData, aLine)
   # print(tail(spData))
   # print(tail(spDayData))
-  # save(list=c("spData", "spDayData"), file=sp_rfile)
-
+  save(list=c("spData", "spDayData"), file=sp_rfile)
 }
 
 gEditButton <- function() {
@@ -201,7 +196,7 @@ ggList <- list(horizontal = FALSE, spacing=5,
   expand=TRUE, fill='x', cont = sp_f1)
 
 # Iterate through names
-ggNames <- paste0("P", 1:3 )
+ggNames <- c("P1", "P2", "WT")
 ggLabels <- c(paste("Project",1:2), "Wasted Time")
 doButtonList <- list()
 
