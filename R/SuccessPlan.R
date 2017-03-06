@@ -44,8 +44,8 @@ calcTime <- function(dat) {
     dat <- transform(dat, HourP=round((Hour/(sum(Hour)))*100, 1))
     as.data.frame(dat)
 }
-debugonce(calcTime)
-tt=calcTime(spData)
+# debugonce(calcTime)
+# tt=calcTime(spData)
 
 writeDay <- function(dat, spDayData) {
   today <- as.Date(Sys.time()) 
@@ -117,7 +117,7 @@ doPlot <- function(spDayData) {
 
 
 doButton <- function(h, ...) {
-# browser()
+browser()
   other <- setdiff(paste0(ggNames, "B"), h$action)
   dflt <- list(weight="normal", size=10, color="black")
   Act <- list(weight="bold", size=12, color="red")
@@ -133,13 +133,12 @@ doButton <- function(h, ...) {
 
   getLab <- function(out, gLabel) {
     out <- subset(out, Task==gLabel)
-    out <- lapply(out, as.character)
     paste0(out["HourF"], " Hrs (", out["HourP"] , "%)")
   }
 
-  svalue(P1L) <- getLab(tt, "proj1")
-  svalue(P2L) <- getLab(tt, "proj2")
-  svalue(P3L) <- getLab(tt, "proj2")
+  # svalue(P1L) <- getLab(tt, "proj1")
+  # svalue(P2L) <- getLab(tt, "proj2")
+  # svalue(P3L) <- getLab(tt, "proj2")
 
   # ### Update GUI
   # updateData <- function(out) {
@@ -221,6 +220,7 @@ for(i in seq(3)) {
     glabel("", cont=gi))
   addSpace(gi, 5)
 }
+# AllG <- mget(ls(ggNames))
 
 ###############################################################################################
 ######################################## HANDLERS #############################################
