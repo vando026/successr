@@ -12,9 +12,9 @@ sp_fname<- file.path(Sys.getenv("USERPROFILE"), "Dropbox/R/SuccessPlan")
 sp_tfile <- file.path(sp_fname, "TimeSheetR.csv")
 sp_rfile <- file.path(sp_fname, "TimeSheet.Rdata")
 
-spData <- read.csv(sp_tfile, header=TRUE)
-spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01') )
-
+# spData <- read.csv(sp_tfile, header=TRUE)
+# spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01') )
+# spData <- transform(spData, Task=factor(Task, levels=c("P1", "P2", "WT", "ST")))
 
 ##### Bring in the Data
 load(sp_rfile)
@@ -33,6 +33,10 @@ sp_fmt <- function(x) {
 calcTime <- function(dat) {
     today <- as.Date(Sys.time()) 
     dat <- subset(dat, as.Date(Time)==today)
+    if(nrow(dat)<=1) {
+      dat <- data.frame(Task="P1", Date=today, Hour=0, HourP=0)
+      return(dat) 
+    } 
     Seconds <- as.numeric(dat$Time)
     Hour <- round(diff(Seconds)/(60*60), 2)
     dat <- transform(dat, Hour=c(Hour, NA),
@@ -40,7 +44,6 @@ calcTime <- function(dat) {
     dat <- aggregate(Hour ~ Task + Date, dat, sum, na.action=na.omit)
     dat <- dat[dat$Task!="ST", ]
     dat <- transform(dat, HourP=round((Hour/(sum(Hour)))*100, 1))
-    # dat <- transform(dat, Task = as.character(Task))
     as.data.frame(dat)
 }
 # debugonce(calcTime)
@@ -54,22 +57,13 @@ writeDay <- function(dat, sp_rfile) {
   if(any(today %in% spDayData$Date)) {
     spDayData$Hour[spDayData$Date==today] <- dat$Hour
   } else {
-    spDayData = rbind(spDayData, day)
+    spDayData = rbind(spDayData, dat)
   }
-  # spData <- subset(spData, as.Date(Time)==today)
   return(spDayData)
 }
 # debugonce(writeDay)
 # yes <- writeDay(tt, spDayData)
 
-
-writeTime <- function(sp_rfile) {
-  load(sp_rfile)
-  aLine <- c(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), 
-    substr(h$action,1,2))
-  spData <- rbind(spData, aLine)
-  return(spData)
-}
 
 ### Select days to backcalc
 sp_select <- function(dat, 
@@ -81,8 +75,9 @@ sp_select <- function(dat,
 # debugonce(sp_select)
 # sp_select(yes, 7)
 
-calcWeek <- function(dat, sp_fmt=TRUE) {
-  dat <- sp_select(dat, 7)
+calcWeek <- function(sp_rfile, sp_fmt=TRUE) {
+  load(sp_rfile)
+  dat <- sp_select(spDayData, 7)
   dat <- aggregate(Hour ~ Date, dat, sum, na.action=na.omit)
   if (sp_fmt==TRUE)
     dat <- transform(dat, Hour=sp_fmt(Hour))
@@ -93,10 +88,11 @@ calcWeek <- function(dat, sp_fmt=TRUE) {
   dat
 }
 # debugonce(calcWeek)
-# spDayData <- calcWeek(spDay, sp_fmt=FALSE)
+# spDayData1 <- calcWeek(sp_rfile, sp_fmt=FALSE)
 
-calcMonth <- function(dat) {
-  dat <- sp_select(dat, 31)
+calcMonth <- function(sp_rfile) {
+  load(sp_rfile)
+  dat <- sp_select(spDayData, 31)
   dat <- transform(dat, Week=as.numeric(format(Date, "%U")))
   maxWk <- max(dat$Week)
   dat <- subset(dat, Week %in% c((maxWk-3):maxWk))
@@ -108,8 +104,8 @@ calcMonth <- function(dat) {
 # debugonce(calcMonth)
 # tt <- calcMonth(spDayData)
 
-doPlot <- function(spDayData) {
-  out <- calcMonth(spDayData)
+doPlot <- function(sp_rfile) {
+  out <- calcMonth(sp_rfile)
   f <- tempfile( )
   png(f, units="in",
        width=3.6, height=1.8, pointsize=8, res=100, type="cairo")
@@ -120,7 +116,7 @@ doPlot <- function(spDayData) {
   dev.off()
   f
 }
-# doPlot(spDayData)
+# doPlot(sp_rfile)
 
 
 doButton <- function(h, ...) {
@@ -146,18 +142,20 @@ doButton <- function(h, ...) {
     }
     paste0(Hour,"Hrs (",HourP,"%)")
   }
-browser()
+  load(sp_rfile)
+  # Write to time data file
+  aLine <- c(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), 
+    substr(h$action,1,2))
+  spData <- rbind(spData, aLine)
+  # Write to day data file
   cdat <- calcTime(spData)
+  spDayData <- writeDay(cdat, sp_rfile)
+  # Update GUI
   for(i in seq(3)) {
     ii <- get(paste0(ggNames[i],"L"), envir=globalenv()) 
     svalue(ii) <- getLab(cdat, ggNames[i])
   }
-
-  spDayData <- writeDay(cdat, sp_rfile)
-  spData <- writeTime(sp_rfile)
   save(list=c("spData", "spDayData"), file=sp_rfile)
-  print(tail(spData))
-  print(tail(spDayData))
 }
 
 gEditButton <- function() {
@@ -168,14 +166,14 @@ gEditButton <- function() {
   addHandlerChanged(DF, handler = function(h ,...) {
     print("YESSSS")
   })
-  svalue(notebook) <- 2
+  # svalue(notebook) <- 2
 }
 
-lastWkUpdate <- function(spDayData) {
-  sp_DF <- calcWeek(spDayData)
+lastWkUpdate <- function(sp_rfile) {
+  sp_DF <- calcWeek(sp_rfile)
   sp_o1[] <- sp_DF
-  svalue(img_out) <- doPlot(spDayData)
-  svalue(notebook) <- 3
+  svalue(img_out) <- doPlot(sp_rfile)
+  svalue(notebook) <- 2
 }
 
 ###############################################################################################
@@ -200,13 +198,13 @@ ggList <- list(horizontal = FALSE, spacing=5,
 # Iterate through names
 ggNames <- c("P1", "P2", "WT")
 ggLabels <- c(paste("Project",1:2), "Wasted Time")
-doButtonList <- list()
 
 # Now do all settings for buttons
 for(i in seq(3)) {
   assign(paste0(ggNames[i],"G"), 
     do.call("ggroup", ggList))
   gi <- get(paste0(ggNames[i],"G"), envir=environment())
+  addSpace(gi, 5)
   assign(paste0(ggNames[i],"B"),
     gbutton(ggLabels[i], cont=gi, expand=TRUE, fill="y"))
   bi <- get(paste0(ggNames[i],"B"), envir=environment())
@@ -215,72 +213,38 @@ for(i in seq(3)) {
   sep <- gseparator(cont=gi)
   assign(paste0(ggNames[i],"L"), 
     glabel("", cont=gi))
-  addSpace(gi, 5)
+  addSpace(gi, 2)
 }
 # AllG <- mget(ls(ggNames))
 
 ###############################################################################################
 ######################################## HANDLERS #############################################
 ###############################################################################################
-# sapply(c(1:3), function(x)
-  # addHandlerChanged(, handler = doButton, action=list(doName="Yes")))
 
-# addSpace(sp_g1, 5)
-# sp_g1
-# doButtonList$P1
-# size(sp_g1) <- c(70, 100)
-# sep <- gseparator(cont=sp_g1)
-# addSpace(sp_g1, 5)
-
-# sp_g2 <- ggroup(horizontal = FALSE, spacing=5, expand=TRUE, fill='x', cont = sp_f1)
-# addSpace(sp_g2, 5)
-# proj2 <- gbutton("Project 2", cont = sp_g2, expand=TRUE, fill='y',
-#   handler=function(h, ...) doButton("proj2"))
-# size(sp_g2) <- c(70, 100)
-# sep <- gseparator(cont=sp_g2)
-# outP2 <- glabel("", cont=sp_g2)
-# addSpace(sp_g2, 5)
-
-# sp_g3 <- ggroup(horizontal = FALSE, spacing=5, expand=TRUE, fill='x',  cont = sp_f1)
-# addSpace(sp_g3, 5)
-# wt <- gbutton("Wasted Time", cont= sp_g3, expand=TRUE, fill='y',
-#   handler=function(h, ...) doButton("wt")) 
-# size(sp_g3) <- c(70, 100)
-# sep <- gseparator(cont=sp_g3)
-# outWT <- glabel("", cont=sp_g3)
-# addSpace(sp_g3, 5)
-
-# sp_f2 <- ggroup(horizontal=FALSE, spacing=8, cont=sp_g0)
-# addSpace(sp_f2, 3)
-# Stop <- gbutton("Stop", cont=sp_f2, expand=TRUE, fill='y',
-#   handler=function(h, ...) doButton("Stop"))
-# r_act <- gaction("Report", icon="overview", handler=function(...) lastWkUpdate(sp_tfile))
-# rweek <- gbutton(action=r_act, cont=sp_f2, expand=TRUE, fill='y')
-# e_act <- gaction("Edit", icon="editor", handler=function(...) gEditButton())
-# Edit <- gbutton(action=e_act, cont=sp_f2, expand=TRUE, fill='y')
-# addSpace(sp_f2, 1.3)
+sp_f2 <- ggroup(horizontal=FALSE, spacing=8, cont=sp_g0)
+addSpace(sp_f2, 3)
+ST <- gbutton("Stop", cont=sp_f2, expand=TRUE, fill='y')
+addHandlerChanged(ST, handler=doButton, action="ST")
+r_act <- gaction("Report", icon="overview", handler=function(...) lastWkUpdate(sp_rfile))
+rweek <- gbutton(action=r_act, cont=sp_f2, expand=TRUE, fill='y')
+e_act <- gaction("Edit", icon="editor", handler=function(...) gEditButton())
+Edit <- gbutton(action=e_act, cont=sp_f2, expand=TRUE, fill='y')
+addSpace(sp_f2, 0.0)
 f3 <- ggroup(horizontal=FALSE, spacing=10, cont=sp_g0)
 
 
-# addHandlerChanged(e_act, handler = function(h ,...) {
-#   print("YESSSS")
-# })
+sp_out <- ggroup(label='Last Week', horizontal=TRUE, 
+  spacing=10, cont=notebook)
+out0 <- ggroup(horizontal=TRUE, cont=sp_out)
+# doButton(h=list(obj=WTB, action="WT"))
+sp_DF <- calcWeek(sp_rfile, sp_fmt=TRUE)
+sp_o1 <- gtable(sp_DF, cont = out0, expand=FALSE)
+size(sp_o1) <- list(width=240, height=220, column.widths=c(90, 50, 50, 50))
 
-# sp_out <- ggroup(label='Last Week', horizontal=TRUE, 
-#   spacing=10, cont=notebook)
-# out0 <- ggroup(horizontal=TRUE, cont=sp_out)
-# doButton("wt", days=0)
-# sp_DF <- calcWeek(sp_tfile, sp_fmt=TRUE)
-# sp_o1 <- gtable(sp_DF, cont = out0, expand=FALSE)
-# size(sp_o1) <- list(width=200, height=220, column.widths=c(100, 50, 50))
-
-# # Plots
-# sp_gr <- ggroup(cont=out0, horizontal=TRUE, spacing=0)
-# img <- doPlot(sp_tfile) 
-# img_out <- gimage(basename(img),dirname(img), cont = out0 )
-
-# Trim data
-# dumpData(sp_tfile)
+# Plots
+sp_gr <- ggroup(cont=out0, horizontal=TRUE, spacing=0)
+img <- doPlot(sp_rfile) 
+img_out <- gimage(basename(img),dirname(img), cont = out0)
 
 svalue(notebook) <- 1
 visible(window) <- TRUE
