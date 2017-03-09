@@ -9,11 +9,11 @@ options (guiToolkit="RGtk2" )
 
 # Files
 sp_fname<- file.path(Sys.getenv("USERPROFILE"), "Dropbox/R/SuccessPlan")
-sp_tfile <- file.path(sp_fname, "TimeSheet.csv")
+sp_tfile <- file.path(sp_fname, "TimeSheetR.csv")
 sp_rfile <- file.path(sp_fname, "TimeSheet.Rdata")
 
-# spData <- read.csv(sp_tfile, header=TRUE)
-# spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01') )
+spData <- read.csv(sp_tfile, header=TRUE)
+spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01') )
 
 
 ##### Bring in the Data
@@ -46,7 +46,8 @@ calcTime <- function(dat) {
 # debugonce(calcTime)
 # tt=calcTime(spData)
 
-writeDay <- function(dat, spDayData) {
+writeDay <- function(dat, sp_rfile) {
+  load(sp_rfile)
   today <- as.Date(Sys.time()) 
   dat <- subset(dat, !(Task %in% c("WT", "ST")))
   dat <- aggregate(Hour ~ Date, dat, sum, na.action=na.omit)
@@ -56,12 +57,19 @@ writeDay <- function(dat, spDayData) {
     spDayData = rbind(spDayData, day)
   }
   # spData <- subset(spData, as.Date(Time)==today)
-  # save(list=c("spData", "spDayData"), 
-    # file=sp_rfile)
   return(spDayData)
 }
 # debugonce(writeDay)
 # yes <- writeDay(tt, spDayData)
+
+
+writeTime <- function(sp_rfile) {
+  load(sp_rfile)
+  aLine <- c(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), 
+    substr(h$action,1,2))
+  spData <- rbind(spData, aLine)
+  return(spData)
+}
 
 ### Select days to backcalc
 sp_select <- function(dat, 
@@ -138,24 +146,18 @@ doButton <- function(h, ...) {
     }
     paste0(Hour,"Hrs (",HourP,"%)")
   }
-
-  updateData <- function(out) {
-    for(i in seq(3)) {
-      ii <- get(paste0(ggNames[i],"L"), envir=globalenv()) 
-      svalue(ii) <- getLab(out, ggNames[i])
-    }
-  }
+browser()
   cdat <- calcTime(spData)
-  updateData(cdat)
-  spDayData <- writeDay(cdat, spDayData)
+  for(i in seq(3)) {
+    ii <- get(paste0(ggNames[i],"L"), envir=globalenv()) 
+    svalue(ii) <- getLab(cdat, ggNames[i])
+  }
 
-  load(sp_rfile)
-  aLine <- c(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), 
-    substr(h$action,1,2))
-  spData <- rbind(spData, aLine)
-  # print(tail(spData))
-  # print(tail(spDayData))
+  spDayData <- writeDay(cdat, sp_rfile)
+  spData <- writeTime(sp_rfile)
   save(list=c("spData", "spDayData"), file=sp_rfile)
+  print(tail(spData))
+  print(tail(spDayData))
 }
 
 gEditButton <- function() {
