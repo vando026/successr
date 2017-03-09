@@ -12,12 +12,13 @@ sp_fname<- file.path(Sys.getenv("USERPROFILE"), "Dropbox/R/SuccessPlan")
 sp_tfile <- file.path(sp_fname, "TimeSheetR.csv")
 sp_rfile <- file.path(sp_fname, "TimeSheet.Rdata")
 
+# load(sp_rfile)
 # spData <- read.csv(sp_tfile, header=TRUE)
 # spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01') )
 # spData <- transform(spData, Task=factor(Task, levels=c("P1", "P2", "WT", "ST")))
+# save(list=c("spData", "spDayData"), file=sp_rfile)
 
 ##### Bring in the Data
-load(sp_rfile)
 
 ##### Format Time 
 sp_fmt <- function(x) {
@@ -158,16 +159,26 @@ doButton <- function(h, ...) {
   save(list=c("spData", "spDayData"), file=sp_rfile)
 }
 
-gEditButton <- function() {
+gEditButton <- function(sp_rfile) {
   load(sp_rfile)
   Gedit <- gwindow("Data Editor") 
-  size(Gedit) <- list(width=80, height=300, column.widths=c(70, 30))
+  size(Gedit) <- list(width=80, 
+    height=300, column.widths=c(70, 30))
   DF <- gdf(tail(spData), cont=Gedit)
   addHandlerChanged(DF, handler = function(h ,...) {
-    print("YESSSS")
+# browser()
+    newDF <- DF[]
+    dfn <- nrow(spData)
+    if(dfn<5) {
+      spData <- newDF 
+    } else {
+      spData <- rbind(spData[1:(dfn-6), ], newDF)
+    }
+  save(list=c("spData", "spDayData"), file=sp_rfile)
   })
-  # svalue(notebook) <- 2
 }
+# debugonce(gEditButton)
+# gEditButton(sp_rfile)
 
 lastWkUpdate <- function(sp_rfile) {
   sp_DF <- calcWeek(sp_rfile)
@@ -215,19 +226,17 @@ for(i in seq(3)) {
     glabel("", cont=gi))
   addSpace(gi, 2)
 }
-# AllG <- mget(ls(ggNames))
 
 ###############################################################################################
 ######################################## HANDLERS #############################################
 ###############################################################################################
-
 sp_f2 <- ggroup(horizontal=FALSE, spacing=8, cont=sp_g0)
 addSpace(sp_f2, 3)
 ST <- gbutton("Stop", cont=sp_f2, expand=TRUE, fill='y')
 addHandlerChanged(ST, handler=doButton, action="ST")
 r_act <- gaction("Report", icon="overview", handler=function(...) lastWkUpdate(sp_rfile))
 rweek <- gbutton(action=r_act, cont=sp_f2, expand=TRUE, fill='y')
-e_act <- gaction("Edit", icon="editor", handler=function(...) gEditButton())
+e_act <- gaction("Edit", icon="editor", handler=function(...) gEditButton(sp_rfile))
 Edit <- gbutton(action=e_act, cont=sp_f2, expand=TRUE, fill='y')
 addSpace(sp_f2, 0.0)
 f3 <- ggroup(horizontal=FALSE, spacing=10, cont=sp_g0)
