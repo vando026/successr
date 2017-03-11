@@ -5,6 +5,7 @@
 # Packages
 require(gWidgets2, quietly=TRUE, warn.conflicts = TRUE)
 require(gWidgets2RGtk2, quietly=TRUE, warn.conflicts = TRUE)
+require(RGtk2Extras, quietly=TRUE, warn.conflicts = FALSE)
 options (guiToolkit="RGtk2" )
 
 # Files
@@ -32,6 +33,7 @@ sp_fmt <- function(x) {
 
 # Calc hours 
 calcTime <- function(dat) {
+  browser()
     today <- as.Date(Sys.time()) 
     dat <- subset(dat, as.Date(Time)==today)
     if(nrow(dat)<=1) {
@@ -159,26 +161,39 @@ doButton <- function(h, ...) {
   save(list=c("spData", "spDayData"), file=sp_rfile)
 }
 
-gEditButton <- function(sp_rfile) {
-  load(sp_rfile)
-  Gedit <- gwindow("Data Editor") 
-  size(Gedit) <- list(width=80, 
-    height=300, column.widths=c(70, 30))
-  DF <- gdf(tail(spData), cont=Gedit)
-  addHandlerChanged(DF, handler = function(h ,...) {
-# browser()
-    newDF <- DF[]
-    dfn <- nrow(spData)
-    if(dfn<5) {
-      spData <- newDF 
-    } else {
-      spData <- rbind(spData[1:(dfn-6), ], newDF)
-    }
-  save(list=c("spData", "spDayData"), file=sp_rfile)
-  })
-}
+# gEditButton <- function(sp_rfile) {
+#   load(sp_rfile)
+#   Gedit <- gwindow("Data Editor") 
+#   size(Gedit) <- list(width=80, 
+#     height=300, column.widths=c(70, 30))
+#   DF <- gdf(tail(spData), cont=Gedit)
+#   addHandlerChanged(DF, handler = function(h ,...) {
+#     newDF <- DF[]
+#     dfn <- nrow(spData)
+#     if(dfn<5) {
+#       spData <- newDF 
+#     } else {
+#       spData <- rbind(spData[1:(dfn-6), ], newDF)
+#     }
+#   save(list=c("spData", "spDayData"), file=sp_rfile)
+#   })
+# }
 # debugonce(gEditButton)
 # gEditButton(sp_rfile)
+
+
+gEditButton <- function(sp_rfile) {
+  load(sp_rfile)
+  win <- gtkWindowNew("Toplevel", show=FALSE)
+  obj <- gtkDfEdit(spData, size = c(500, 500), 
+    update=FALSE, modal=FALSE, autosize=FALSE, col.width=c(150, 40))
+  win$setTitle("Editor")
+  spData <- obj[]
+  print(tail(spData))
+  win$add(obj)
+  win$show()
+  save(list=c("spData", "spDayData"), file=sp_rfile)
+}
 
 lastWkUpdate <- function(sp_rfile) {
   sp_DF <- calcWeek(sp_rfile)
