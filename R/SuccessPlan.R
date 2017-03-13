@@ -51,17 +51,17 @@ calcTime <- function(dat) {
 # debugonce(calcTime)
 # tt=calcTime(spData)
 
-writeDay <- function(dat, sp_rfile) {
-  load(sp_rfile)
+writeDay <- function(dat, spDayData) {
   today <- as.Date(Sys.time()) 
   dat <- subset(dat, !(Task %in% c("WT", "ST")))
+  if(nrow(dat)<1) return(spDayData)
   dat <- aggregate(Hour ~ Date, dat, sum, na.action=na.omit)
   if(any(today %in% spDayData$Date)) {
     spDayData$Hour[spDayData$Date==today] <- dat$Hour
   } else {
     spDayData = rbind(spDayData, dat)
   }
-  return(spDayData)
+  spDayData 
 }
 # debugonce(writeDay)
 # yes <- writeDay(tt, spDayData)
@@ -122,19 +122,13 @@ doPlot <- function(sp_rfile) {
 
 
 doButton <- function(h, ...) {
-  other <- setdiff(paste0(ggNames, "B"), h$action)
-  dflt <- list(weight="normal", size=10, color="black")
-  Act <- list(weight="bold", size=12, color="red")
-  if (h$action=="ST") {
-    font(h$obj) <- dflt
-  } else {
-    font(h$obj) <- Act
-    for(i in other) {
-      ii <- get(i, envir=globalenv())
-      font(ii) <- dflt
-    }
-  } 
-
+  toggleOff <- function(obj) {
+    sapply(obj, function(i) { ii <- get(i, envir=globalenv())
+      font(ii) <- list(weight="normal", size=10, color="black")})
+  }
+  ifelse(h$action=="ST", toggleOff(ggNames), toggleOff(setdiff(ggNames, h$action)))
+  if(h$action!="ST") font(h$obj) <- list(weight="bold", size=12, color="red")
+   
   getLab <- function(out, gLabel) {
     out <- subset(out, Task==gLabel)
     if(nrow(out)==0) {
@@ -144,14 +138,12 @@ doButton <- function(h, ...) {
     }
     paste0(Hour,"Hrs (",HourP,"%)")
   }
-  load(sp_rfile)
   # Write to time data file
-  aLine <- c(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), 
-    substr(h$action,1,2))
+  load(sp_rfile)
+  aLine <- c(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), h$action)
   spData <- rbind(spData, aLine)
-  # Write to day data file
   cdat <- calcTime(spData)
-  spDayData <- writeDay(cdat, sp_rfile)
+  spDayData <- writeDay(cdat, spDayData)
   # Update GUI
   for(i in seq(3)) {
     ii <- get(paste0(ggNames[i],"L"), envir=globalenv()) 
@@ -232,10 +224,8 @@ for(i in seq(3)) {
     do.call("ggroup", ggList))
   gi <- get(paste0(ggNames[i],"G"), envir=environment())
   addSpace(gi, 5)
-  assign(paste0(ggNames[i],"B"),
-    gbutton(ggLabels[i], cont=gi, expand=TRUE, fill="y"))
-  bi <- get(paste0(ggNames[i],"B"), envir=environment())
-  addHandlerChanged(bi, handler=doButton, action=paste0(ggNames[i],"B"))
+  assign(ggNames[i], gbutton(ggLabels[i], cont=gi, expand=TRUE, fill="y",
+    handler=doButton, action=ggNames[i]))
   size(gi) <- c(70, 100)
   sep <- gseparator(cont=gi)
   assign(paste0(ggNames[i],"L"), 
@@ -248,8 +238,9 @@ for(i in seq(3)) {
 ###############################################################################################
 sp_f2 <- ggroup(horizontal=FALSE, spacing=8, cont=sp_g0)
 addSpace(sp_f2, 3)
-ST <- gbutton("Stop", cont=sp_f2, expand=TRUE, fill='y')
-addHandlerChanged(ST, handler=doButton, action="ST")
+ST <- gbutton("Stop", cont=sp_f2, expand=TRUE, fill='y',
+  handler=doButton, action="ST")
+# addHandlerChanged(ST, handler=doButton, action="ST")
 r_act <- gaction("Report", icon="overview", handler=function(...) lastWkUpdate(sp_rfile))
 rweek <- gbutton(action=r_act, cont=sp_f2, expand=TRUE, fill='y')
 e_act <- gaction("Edit", icon="editor", handler=function(...) gEditButton(sp_rfile))
