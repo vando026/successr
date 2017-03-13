@@ -33,7 +33,6 @@ sp_fmt <- function(x) {
 
 # Calc hours 
 calcTime <- function(dat) {
-  browser()
     today <- as.Date(Sys.time()) 
     dat <- subset(dat, as.Date(Time)==today)
     if(nrow(dat)<=1) {
@@ -185,13 +184,15 @@ doButton <- function(h, ...) {
 gEditButton <- function(sp_rfile) {
   load(sp_rfile)
   win <- gtkWindowNew("Toplevel", show=FALSE)
+  print(tail(spData))
   obj <- gtkDfEdit(spData, size = c(500, 500), 
     update=FALSE, modal=FALSE, autosize=FALSE, col.width=c(150, 40))
   win$setTitle("Editor")
   spData <- obj[]
-  print(tail(spData))
   win$add(obj)
   win$show()
+  spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01'))
+  print(tail(spData))
   save(list=c("spData", "spDayData"), file=sp_rfile)
 }
 
