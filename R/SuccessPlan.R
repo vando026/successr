@@ -13,6 +13,8 @@ sp_fname<- file.path(Sys.getenv("USERPROFILE"), "Dropbox/R/SuccessPlan")
 sp_tfile <- file.path(sp_fname, "TimeSheetR.csv")
 sp_rfile <- file.path(sp_fname, "TimeSheet.Rdata")
 
+today <- as.Date(Sys.time())
+
 # load(sp_rfile)
 # spData <- read.csv(sp_tfile, header=TRUE)
 # spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01') )
@@ -29,38 +31,37 @@ sp_fmt <- function(x) {
 }
 # x=sp_fmt(c(0, 0))
 
-### Select days to backcalc
-sp_select <- function(dat, 
-  days=eval.parent(quote(days))) {
-  ds <- as.Date(Sys.time()) - days
-  dat <- subset(dat, Date  > ds)
-  dat
+fmtData <- function(dat, F1="Hour~Task", byVar, days) {
+  dat1 <- subset(dat, Date > (today-days))
+  if(nrow(dat1)==0) {
+    dat1 <- data.frame(Date=as.Date(Sys.time()), Hour=0) 
+  } else {
+    dat1 <- aggregate(as.formula(F1), dat1, sum, na.action=na.omit)
+  }
+  return(dat1)
 }
-# debugonce(sp_select)
-# sp_select(yes, 7)
+# fmtData(spDayData, F1="Hour ~ Date", days=1)
 
-# Calc hours 
+
+
 calcTime <- function(dat) {
-    today <- as.Date(Sys.time()) 
     dat <- subset(dat, as.Date(Time)==today)
     if(nrow(dat)<=1) {
-      dat <- data.frame(Task="P1", Date=today, Hour=0, HourP=0)
+      dat <- data.frame(Task="WT", Date=today, Hour=0, HourP=0)
       return(dat) 
     } 
     Seconds <- as.numeric(dat$Time)
     Hour <- round(diff(Seconds)/(60*60), 2)
     dat <- transform(dat, Hour=c(Hour, NA),
       Date=as.Date(Time))
-    dat <- aggregate(Hour ~ Task + Date, dat, sum, na.action=na.omit)
     dat <- dat[dat$Task!="ST", ]
+    dat <- aggregate(Hour ~ Task, dat, sum, na.action=na.omit)
     dat <- transform(dat, HourP=round((Hour/(sum(Hour)))*100, 1))
     as.data.frame(dat)
 }
-# debugonce(calcTime)
-# tt=calcTime(spData)
+
 
 writeDay <- function(dat, spDayData) {
-  today <- as.Date(Sys.time()) 
   dat <- subset(dat, !(Task %in% c("WT", "ST")))
   if(nrow(dat)<1) return(spDayData)
   dat <- aggregate(Hour ~ Date, dat, sum, na.action=na.omit)
