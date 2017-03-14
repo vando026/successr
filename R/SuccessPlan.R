@@ -19,9 +19,7 @@ sp_rfile <- file.path(sp_fname, "TimeSheet.Rdata")
 # spData <- transform(spData, Task=factor(Task, levels=c("P1", "P2", "WT", "ST")))
 # save(list=c("spData", "spDayData"), file=sp_rfile)
 
-##### Bring in the Data
-
-##### Format Time 
+#### Format Time 
 sp_fmt <- function(x) {
   fhour <- x %/% 1
   fmin <- round((x %% 1)*0.6, 2) 
@@ -30,6 +28,16 @@ sp_fmt <- function(x) {
   ifelse(is.na(x), "0:00", as.character(out))
 }
 # x=sp_fmt(c(0, 0))
+
+### Select days to backcalc
+sp_select <- function(dat, 
+  days=eval.parent(quote(days))) {
+  ds <- as.Date(Sys.time()) - days
+  dat <- subset(dat, Date  > ds)
+  dat
+}
+# debugonce(sp_select)
+# sp_select(yes, 7)
 
 # Calc hours 
 calcTime <- function(dat) {
@@ -66,16 +74,6 @@ writeDay <- function(dat, spDayData) {
 # debugonce(writeDay)
 # yes <- writeDay(tt, spDayData)
 
-
-### Select days to backcalc
-sp_select <- function(dat, 
-  days=eval.parent(quote(days))) {
-  ds <- as.Date(Sys.time()) - days
-  dat <- subset(dat, Date  > ds)
-  dat
-}
-# debugonce(sp_select)
-# sp_select(yes, 7)
 
 calcWeek <- function(sp_rfile, sp_fmt=TRUE) {
   load(sp_rfile)
@@ -233,14 +231,10 @@ for(i in seq(3)) {
   addSpace(gi, 2)
 }
 
-###############################################################################################
-######################################## HANDLERS #############################################
-###############################################################################################
 sp_f2 <- ggroup(horizontal=FALSE, spacing=8, cont=sp_g0)
 addSpace(sp_f2, 3)
 ST <- gbutton("Stop", cont=sp_f2, expand=TRUE, fill='y',
   handler=doButton, action="ST")
-# addHandlerChanged(ST, handler=doButton, action="ST")
 r_act <- gaction("Report", icon="overview", handler=function(...) lastWkUpdate(sp_rfile))
 rweek <- gbutton(action=r_act, cont=sp_f2, expand=TRUE, fill='y')
 e_act <- gaction("Edit", icon="editor", handler=function(...) gEditButton(sp_rfile))
