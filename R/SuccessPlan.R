@@ -159,21 +159,19 @@ doButton <- function(h, ...) {
 
 
 gEditButton <- function(sp_rfile) {
+browser()
   load(sp_rfile)
   win <- gtkWindowNew("Toplevel", show=FALSE)
   obj <- gtkDfEdit(spData, size = c(500, 500), 
     update=FALSE, modal=FALSE, autosize=FALSE, col.width=c(150, 40))
   win$setTitle("Editor")
-  spData <- obj[]
   win$add(obj)
   win$show()
-  cell_renderer <- gtkCellRendererText()
-  cell_renderer['editable'] <- TRUE
-  gSignalConnect(cell_renderer, "edited", f=function(cell_renderer,  newtext, user.data) {
-    print(tail(user.data))}, data=obj[])
-  spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01'))
-  print("yes")
-  save(list=c("spData", "spDayData"), file=sp_rfile)
+  gSignalConnect(obj, "edited", f=function(obj) {
+    print(tail(obj[]))})
+  # spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01'))
+  # print("yes")
+  # save(list=c("spData", "spDayData"), file=sp_rfile)
 }
 
 lastWkUpdate <- function(sp_rfile) {
