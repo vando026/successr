@@ -5,7 +5,7 @@
 # Packages
 require(gWidgets2, quietly=TRUE, warn.conflicts = TRUE)
 require(gWidgets2RGtk2, quietly=TRUE, warn.conflicts = TRUE)
-require(RGtk2Extras, quietly=TRUE, warn.conflicts = FALSE)
+# require(RGtk2Extras, quietly=TRUE, warn.conflicts = FALSE)
 options (guiToolkit="RGtk2" )
 
 # Files
@@ -137,42 +137,21 @@ doButton <- function(h, ...) {
   print(tail(spData))
 }
 
-# gEditButton <- function(sp_rfile) {
-#   load(sp_rfile)
-#   Gedit <- gwindow("Data Editor") 
-#   size(Gedit) <- list(width=80, 
-#     height=300, column.widths=c(70, 30))
-#   DF <- gdf(tail(spData), cont=Gedit)
-#   addHandlerChanged(DF, handler = function(h ,...) {
-#     newDF <- DF[]
-#     dfn <- nrow(spData)
-#     if(dfn<5) {
-#       spData <- newDF 
-#     } else {
-#       spData <- rbind(spData[1:(dfn-6), ], newDF)
-#     }
-#   save(list=c("spData", "spDayData"), file=sp_rfile)
-#   })}
-# }
-# debugonce(gEditButton)
-# gEditButton(sp_rfile)
-
-
 gEditButton <- function(sp_rfile) {
-browser()
+# browser()
   load(sp_rfile)
-  win <- gtkWindowNew("Toplevel", show=FALSE)
-  obj <- gtkDfEdit(spData, size = c(500, 500), 
-    update=FALSE, modal=FALSE, autosize=FALSE, col.width=c(150, 40))
-  win$setTitle("Editor")
-  win$add(obj)
-  win$show()
-  gSignalConnect(obj, "edited", f=function(obj) {
-    print(tail(obj[]))})
-  # spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01'))
-  # print("yes")
-  # save(list=c("spData", "spDayData"), file=sp_rfile)
+  Gedit <- gwindow("Data Editor") 
+  size(Gedit) <- list(width=80, 
+    height=300, column.widths=c(70, 30))
+  DF <- gdf(tail(spData), cont=Gedit)
+  addHandlerChanged(DF, handler = function(h ,...) {
+    spDataT <- DF[]
+    print(tail(spDataT))
+    save(list=c("spData", "spDataT", "spDayData"), file=sp_rfile)})
 }
+# debugonce(gEditButton)
+gEditButton(sp_rfile)
+
 
 lastWkUpdate <- function(sp_rfile) {
   load(sp_rfile)
