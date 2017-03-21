@@ -5,7 +5,6 @@
 # Packages
 require(gWidgets2, quietly=TRUE, warn.conflicts = TRUE)
 require(gWidgets2RGtk2, quietly=TRUE, warn.conflicts = TRUE)
-# require(RGtk2Extras, quietly=TRUE, warn.conflicts = FALSE)
 options (guiToolkit="RGtk2" )
 
 # Files
@@ -27,13 +26,14 @@ sp_fmt <- function(x) {
   fmin <- round((x %% 1)*0.6, 2) 
   fmin <- sub("(\\d+).(\\d+)", "\\2", format(fmin, nsmall=2))
   out <- paste(fhour, fmin, sep=':')
-  ifelse(is.na(x), "0:00", as.character(out))
+  out 
 }
-# x=sp_fmt(c(0, 0))
+# debugonce(sp_fmt)
+# x=sp_fmt(c(1.2, 3.8))
 
 calcTime <- function(dat) {
-    dat <- subset(dat, as.Date(Time)==today)
-    if(nrow(dat)<=1) return(dat)
+    # dat <- subset(dat, as.Date(Time)==today)
+    if(nrow(dat)<=1) return(NULL)
     Seconds <- as.numeric(dat$Time)
     Hour <- round(diff(Seconds)/(60*60), 2)
     dat <- transform(dat, Hour=c(Hour, NA),
@@ -46,10 +46,21 @@ calcTime <- function(dat) {
 # debugonce(calcTime)
 # tt=calcTime(spData)
 
+getTime <- function(out, x) {
+  if(is.null(out) || any(out$Task %in% x)==FALSE) {
+    Hour <- HourP <- 0 
+  } else {
+    Hour <- out[out$Task %in% x, "Hour"] 
+    HourP <- out[out$Task %in% x, "HourP"] 
+  }
+  paste0(sp_fmt(Hour),"Hrs (",HourP,"%)")
+}
+# getTime(tt, "P1" )
+
 
 writeDay <- function(dat, spDayData) {
   dat <- subset(dat, Task!="WT")
-  if(nrow(dat)==0) return(dat)
+  if(nrow(dat)==0) return(NULL)
   dat <- aggregate(Hour ~ Date, dat, sum)
   if(any(today %in% spDayData$Date)) {
     spDayData$Hour[spDayData$Date==today] <- dat$Hour
@@ -111,30 +122,18 @@ doButton <- function(h, ...) {
   ifelse(h$action=="ST", toggleOff(ggNames), toggleOff(setdiff(ggNames, h$action)))
   if(h$action!="ST") font(h$obj) <- list(weight="bold", size=12, color="red")
    
-  getLab <- function(out, gLabel) {
-    out <- subset(out, Task==gLabel)
-    if(nrow(out)==0) {
-      Hour=sp_fmt(0); HourP="0" 
-    } else {
-      Hour=sp_fmt(out["Hour"]); HourP=out["HourP"]
-    }
-    paste0(Hour,"Hrs (",HourP,"%)")
-  }
   # Write to time data file
   load(sp_rfile)
+  spData <- subset(spData, as.Date(Time)==today)
   aLine <- c(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), h$action)
   spData <- rbind(spData, aLine)
   cdat <- calcTime(spData)
   spDayData <- writeDay(cdat, spDayData)
   save(list=c("spData", "spDayData"), file=sp_rfile)
   # Update GUI
-  for(i in seq(3)) {
-    ii <- get(paste0(ggNames[i],"L"), envir=globalenv()) 
-    svalue(ii) <- getLab(cdat, ggNames[i])
-  }
-  print(tail(spData))
-  load(sp_rfile)
-  print(tail(spData))
+  sapply(ggNames, function(i) {
+    ii <- get(paste0(i,"L"), envir=globalenv()) 
+    svalue(ii) <- getTime(cdat, i)}) 
 }
 
 gEditButton <- function(sp_rfile) {
@@ -145,12 +144,17 @@ gEditButton <- function(sp_rfile) {
     height=300, column.widths=c(70, 30))
   DF <- gdf(tail(spData), cont=Gedit)
   addHandlerChanged(DF, handler = function(h ,...) {
-    spDataT <- DF[]
-    print(tail(spDataT))
-    save(list=c("spData", "spDataT", "spDayData"), file=sp_rfile)})
+    newDF <- DF[]
+    dfn <- nrow(spData)
+    if(dfn<5) {
+      spData <- newDF 
+    } else {
+      spData <- rbind(spData[1:(dfn-6), ], newDF)
+    }
+    save(list=c("spData","spDayData"), file=sp_rfile)})
 }
 # debugonce(gEditButton)
-gEditButton(sp_rfile)
+# gEditButton(sp_rfile)
 
 
 lastWkUpdate <- function(sp_rfile) {
@@ -225,5 +229,4 @@ img_out <- gimage(basename(img),dirname(img), cont = out0)
 
 svalue(notebook) <- 1
 visible(window) <- TRUE
-
 
