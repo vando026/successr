@@ -32,7 +32,7 @@ sp_fmt <- function(x) {
 # x=sp_fmt(c(1.2, 3.8))
 
 calcTime <- function(dat) {
-    # dat <- subset(dat, as.Date(Time)==today)
+    dat <- subset(dat, as.Date(Time)==today)
     if(nrow(dat)<=1) return(NULL)
     Seconds <- as.numeric(dat$Time)
     Hour <- round(diff(Seconds)/(60*60), 2)
@@ -44,7 +44,7 @@ calcTime <- function(dat) {
     dat 
 }
 # debugonce(calcTime)
-# tt=calcTime(spData)
+dat=calcTime(spData)
 
 getTime <- function(out, x) {
   if(is.null(out) || any(out$Task %in% x)==FALSE) {
@@ -59,14 +59,16 @@ getTime <- function(out, x) {
 
 
 writeDay <- function(dat, spDayData) {
-  dat <- subset(dat, Task!="WT")
-  if(nrow(dat)==0) return(NULL)
-  dat <- aggregate(Hour ~ Date, dat, sum)
-  if(any(today %in% spDayData$Date)) {
+# browser()
+  isToday <- any(today %in% spDayData$Date) 
+  if(is.null(dat) && isToday==FALSE) { 
+    newLine <- data.frame(Date=today, Hour=0)
+    spDayData <-  rbind(spDayData, newLine) 
+  } else if (!is.null(dat) && isToday==TRUE) {
+    dat <- subset(dat, Task!="WT")
+    dat <- aggregate(Hour ~ Date, dat, sum)
     spDayData$Hour[spDayData$Date==today] <- dat$Hour
-  } else {
-    spDayData = rbind(spDayData, dat)
-  }
+  } 
   spDayData 
 }
 # debugonce(writeDay)
@@ -83,7 +85,7 @@ calcWeek <- function(dat) {
   dat
 }
 # debugonce(calcWeek)
-# spDayData1 <- calcWeek(sp_rfile, sp_fmt=FALSE)
+spDayData1 <- calcWeek(spDayData)
 
 calcMonth <- function(dat) {
   dat <- subset(dat, Date > (today-31))
@@ -124,11 +126,12 @@ doButton <- function(h, ...) {
    
   # Write to time data file
   load(sp_rfile)
-  spData <- subset(spData, as.Date(Time)==today)
   aLine <- c(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), h$action)
   spData <- rbind(spData, aLine)
+  print(tail(spData))
   cdat <- calcTime(spData)
   spDayData <- writeDay(cdat, spDayData)
+  spData <- subset(spData, as.Date(Time)==today)
   save(list=c("spData", "spDayData"), file=sp_rfile)
   # Update GUI
   sapply(ggNames, function(i) {
