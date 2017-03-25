@@ -32,7 +32,7 @@ sp_fmt <- function(x) {
 # x=sp_fmt(c(1.2, 3.8))
 
 calcTime <- function(dat) {
-    if(nrow(dat)==0) return(NULL)
+browser()
     dat <- subset(dat, as.Date(Time)==today)
     if(nrow(dat)<=1) return(NULL)
     Seconds <- as.numeric(dat$Time)
@@ -41,11 +41,13 @@ calcTime <- function(dat) {
       Date=as.Date(Time))
     dat <- subset(dat, Task!="ST")
     dat <- aggregate(Hour ~ Task + Date, dat, sum, na.action=na.omit)
-    dat <- transform(dat, HourP=round((Hour/(sum(Hour)))*100, 1))
+    HS <- ifelse(is.finite(sum(dat$Hour)==FALSE), 1, sum(dat$Hour))
+    dat <- transform(dat, HourP=
+      round((Hour/HS)*100, 1))
     dat 
 }
 # debugonce(calcTime)
-dat=calcTime(spData)
+# dat=calcTime(spData)
 
 getTime <- function(out, x) {
   if(is.null(out) || any(out$Task %in% x)==FALSE) {
@@ -71,8 +73,6 @@ writeDay <- function(dat, spDayData) {
     spDayData$Hour[spDayData$Date==today] <- dat$Hour
   } 
   spDayData 
-  cat("\n In writeDay\n")
-  print(tail(spDayData))
 }
 # debugonce(writeDay)
 # yes <- writeDay(tt, spDayData)
@@ -120,6 +120,7 @@ doPlot <- function(sp_rfile) {
 
 
 callCalc <- function(spData) {
+browser()
   print(spData)
   cat("\n In doButton\n")
   cdat <- calcTime(spData)
@@ -131,6 +132,7 @@ callCalc <- function(spData) {
   sapply(ggNames, function(i) {
     ii <- get(paste0(i,"L"), envir=globalenv()) 
     svalue(ii) <- getTime(cdat, i)}) 
+  load(sp_rfile)
 }
 # debugonce(callCalc)
 # callCalc(spData)
@@ -146,6 +148,7 @@ doButton <- function(h, ...) {
    
   # Write to time data file
   load(sp_rfile)
+browser()
   aLine <- data.frame(
     Time=format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
     Task=h$action)
