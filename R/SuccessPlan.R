@@ -32,6 +32,7 @@ sp_fmt <- function(x) {
 # x=sp_fmt(c(1.2, 3.8))
 
 calcTime <- function(dat) {
+    if(nrow(dat)==0) return(NULL)
     dat <- subset(dat, as.Date(Time)==today)
     if(nrow(dat)<=1) return(NULL)
     Seconds <- as.numeric(dat$Time)
@@ -70,6 +71,8 @@ writeDay <- function(dat, spDayData) {
     spDayData$Hour[spDayData$Date==today] <- dat$Hour
   } 
   spDayData 
+  cat("\n In writeDay\n")
+  print(tail(spDayData))
 }
 # debugonce(writeDay)
 # yes <- writeDay(tt, spDayData)
@@ -116,6 +119,23 @@ doPlot <- function(sp_rfile) {
 # doPlot(sp_rfile)
 
 
+callCalc <- function(spData) {
+  print(spData)
+  cat("\n In doButton\n")
+  cdat <- calcTime(spData)
+  print(cdat)
+  spDayData <- writeDay(cdat, spDayData)
+  spData <- subset(spData, as.Date(Time)==today)
+  save(list=c("spData", "spDayData"), file=sp_rfile)
+  # Update GUI
+  sapply(ggNames, function(i) {
+    ii <- get(paste0(i,"L"), envir=globalenv()) 
+    svalue(ii) <- getTime(cdat, i)}) 
+}
+# debugonce(callCalc)
+# callCalc(spData)
+
+
 doButton <- function(h, ...) {
   toggleOff <- function(obj) {
     sapply(obj, function(i) { ii <- get(i, envir=globalenv())
@@ -126,17 +146,11 @@ doButton <- function(h, ...) {
    
   # Write to time data file
   load(sp_rfile)
-  aLine <- c(format(Sys.time(), "%Y-%m-%d %H:%M:%S"), h$action)
+  aLine <- data.frame(
+    Time=format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
+    Task=h$action)
   spData <- rbind(spData, aLine)
-  print(tail(spData))
-  cdat <- calcTime(spData)
-  spDayData <- writeDay(cdat, spDayData)
-  spData <- subset(spData, as.Date(Time)==today)
-  save(list=c("spData", "spDayData"), file=sp_rfile)
-  # Update GUI
-  sapply(ggNames, function(i) {
-    ii <- get(paste0(i,"L"), envir=globalenv()) 
-    svalue(ii) <- getTime(cdat, i)}) 
+  callCalc(spData)
 }
 
 gEditButton <- function(sp_rfile) {
@@ -154,6 +168,8 @@ gEditButton <- function(sp_rfile) {
     } else {
       spData <- rbind(spData[1:(dfn-6), ], newDF)
     }
+    cdat <- calcTime(spData)
+    spDayData <- writeDay(cdat, spDayData)
     save(list=c("spData","spDayData"), file=sp_rfile)})
 }
 # debugonce(gEditButton)
@@ -220,7 +236,6 @@ f3 <- ggroup(horizontal=FALSE, spacing=10, cont=sp_g0)
 sp_out <- ggroup(label='Last Week', horizontal=TRUE, 
   spacing=10, cont=notebook)
 out0 <- ggroup(horizontal=TRUE, cont=sp_out)
-# doButton(h=list(obj=WTB, action="WT"))
 sp_DF <- calcWeek(spDayData)
 sp_o1 <- gtable(sp_DF, cont = out0, expand=FALSE)
 size(sp_o1) <- list(width=240, height=220, column.widths=c(90, 50, 50, 50))
