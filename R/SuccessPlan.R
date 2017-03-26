@@ -18,6 +18,9 @@ load(sp_rfile)
 # spData <- read.csv(sp_tfile, header=TRUE)
 # spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01') )
 # spData <- transform(spData, Task=factor(Task, levels=c("P1", "P2", "WT", "ST")))
+# dat=calcTime(spData)
+# dat <- subset(dat, Task!="WT")
+# spDayData <- aggregate(Hour ~ Date, dat, sum)
 # save(list=c("spData", "spDayData"), file=sp_rfile)
 
 #### Format Time 
@@ -32,7 +35,6 @@ sp_fmt <- function(x) {
 # x=sp_fmt(c(1.2, 3.8))
 
 calcTime <- function(dat) {
-browser()
     dat <- subset(dat, as.Date(Time)==today)
     if(nrow(dat)<=1) return(NULL)
     Seconds <- as.numeric(dat$Time)
@@ -41,13 +43,11 @@ browser()
       Date=as.Date(Time))
     dat <- subset(dat, Task!="ST")
     dat <- aggregate(Hour ~ Task + Date, dat, sum, na.action=na.omit)
-    HS <- ifelse(is.finite(sum(dat$Hour)==FALSE), 1, sum(dat$Hour))
-    dat <- transform(dat, HourP=
-      round((Hour/HS)*100, 1))
+    dat <- transform(dat, HourP=round((Hour/sum(Hour))*100, 1))
     dat 
 }
 # debugonce(calcTime)
-# dat=calcTime(spData)
+dat=calcTime(spData)
 
 getTime <- function(out, x) {
   if(is.null(out) || any(out$Task %in% x)==FALSE) {
@@ -62,10 +62,13 @@ getTime <- function(out, x) {
 
 
 writeDay <- function(dat, spDayData) {
-# browser()
   isToday <- any(today %in% spDayData$Date) 
-  if(is.null(dat) && isToday==FALSE) { 
-    newLine <- data.frame(Date=today, Hour=0)
+  if(isToday==FALSE) { 
+    if(is.null(dat)) {
+      newLine <- data.frame(Date=today, Hour=0)
+    } else if(!is.null(dat)) {
+      newLine <- data.frame(Date=today, Hour=dat$Hour)
+    }
     spDayData <-  rbind(spDayData, newLine) 
   } else if (!is.null(dat) && isToday==TRUE) {
     dat <- subset(dat, Task!="WT")
@@ -112,27 +115,30 @@ doPlot <- function(sp_rfile) {
   par(mar=c(2.7, 5.0, 0, 0.4))
   with(out, barplot(Hour, horiz=TRUE, col=rep(c("seagreen1", "seagreen3"), 2), 
     names.arg=Week, las=1))
-  with(out, text(Hour , c(0.7, 1.8, 3, 4.2), labels=HourF, pos=2, adj=1))
+  Bar4 <- ifelse(out[4, "Hour"] < 10, 4, 2)
+  with(out, text(Hour , c(0.7, 1.8, 3, 4.2), labels=HourF, pos=c(rep(2,3),Bar4), adj=1))
   dev.off()
   f
 }
-# doPlot(sp_rfile)
+# debugonce(doPlot)
+doPlot(sp_rfile)
 
 
 callCalc <- function(spData) {
-browser()
-  print(spData)
-  cat("\n In doButton\n")
+  # print(spData)
+  # cat("\n In doButton\n")
   cdat <- calcTime(spData)
-  print(cdat)
+  # print(cdat)
   spDayData <- writeDay(cdat, spDayData)
   spData <- subset(spData, as.Date(Time)==today)
-  save(list=c("spData", "spDayData"), file=sp_rfile)
   # Update GUI
   sapply(ggNames, function(i) {
     ii <- get(paste0(i,"L"), envir=globalenv()) 
     svalue(ii) <- getTime(cdat, i)}) 
-  load(sp_rfile)
+  save(list=c("spData", "spDayData"), file=sp_rfile)
+  write.csv(spDayData, 
+    file=file.path(sp_fname, "spDayData.csv"), 
+    row.names=FALSE)
 }
 # debugonce(callCalc)
 # callCalc(spData)
@@ -148,10 +154,7 @@ doButton <- function(h, ...) {
    
   # Write to time data file
   load(sp_rfile)
-browser()
-  aLine <- data.frame(
-    Time=format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
-    Task=h$action)
+  aLine <- data.frame(Time=Sys.time(), Task=h$action)
   spData <- rbind(spData, aLine)
   callCalc(spData)
 }
@@ -171,9 +174,8 @@ gEditButton <- function(sp_rfile) {
     } else {
       spData <- rbind(spData[1:(dfn-6), ], newDF)
     }
-    cdat <- calcTime(spData)
-    spDayData <- writeDay(cdat, spDayData)
-    save(list=c("spData","spDayData"), file=sp_rfile)})
+    callCalc(spData)
+  })
 }
 # debugonce(gEditButton)
 # gEditButton(sp_rfile)
@@ -241,7 +243,7 @@ sp_out <- ggroup(label='Last Week', horizontal=TRUE,
 out0 <- ggroup(horizontal=TRUE, cont=sp_out)
 sp_DF <- calcWeek(spDayData)
 sp_o1 <- gtable(sp_DF, cont = out0, expand=FALSE)
-size(sp_o1) <- list(width=240, height=220, column.widths=c(90, 50, 50, 50))
+size(sp_o1) <- list(width=220, height=220, column.widths=c(90, 60, 50, 20))
 
 # Plots
 sp_gr <- ggroup(cont=out0, horizontal=TRUE, spacing=0)
