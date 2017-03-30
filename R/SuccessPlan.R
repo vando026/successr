@@ -125,10 +125,7 @@ doPlot(sp_rfile)
 
 
 callCalc <- function(spData) {
-  # print(spData)
-  # cat("\n In doButton\n")
   cdat <- calcTime(spData)
-  # print(cdat)
   spDayData <- writeDay(cdat, spDayData)
   spData <- subset(spData, as.Date(Time)==today)
   # Update GUI
@@ -165,14 +162,15 @@ gEditButton <- function(sp_rfile) {
   Gedit <- gwindow("Data Editor") 
   size(Gedit) <- list(width=80, 
     height=300, column.widths=c(70, 30))
-  DF <- gdf(tail(spData), cont=Gedit)
+  dfi <- 11
+  DF <- gdf(tail(spData, dfi), cont=Gedit)
   addHandlerChanged(DF, handler = function(h ,...) {
     newDF <- DF[]
-    dfn <- nrow(spData)
-    if(dfn<5) {
+    dfn <- nrow(spData); 
+    if(dfn<dfi) {
       spData <- newDF 
     } else {
-      spData <- rbind(spData[1:(dfn-6), ], newDF)
+      spData <- rbind(spData[1:(dfn-(dfi+1)), ], newDF)
     }
     callCalc(spData)
   })
@@ -193,7 +191,7 @@ lastWkUpdate <- function(sp_rfile) {
 ######################################## LAYOUT ###############################################
 ###############################################################################################
 window <- gwindow("The Ultimate Success Plan", 
-  width=620, height=230, visible=FALSE)
+  width=620, height=240, visible=FALSE)
 
 # This makes the tabs
 notebook <- gnotebook (cont = window )
@@ -243,7 +241,7 @@ sp_out <- ggroup(label='Last Week', horizontal=TRUE,
 out0 <- ggroup(horizontal=TRUE, cont=sp_out)
 sp_DF <- calcWeek(spDayData)
 sp_o1 <- gtable(sp_DF, cont = out0, expand=FALSE)
-size(sp_o1) <- list(width=220, height=220, column.widths=c(90, 60, 50, 20))
+size(sp_o1) <- list(width=250, height=220, column.widths=c(90, 70, 50, 40))
 
 # Plots
 sp_gr <- ggroup(cont=out0, horizontal=TRUE, spacing=0)
