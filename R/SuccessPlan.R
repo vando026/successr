@@ -67,6 +67,8 @@ writeDay <- function(dat, spDayData) {
     if(is.null(dat)) {
       newLine <- data.frame(Date=today, Hour=0)
     } else if(!is.null(dat)) {
+      dat <- subset(dat, Task!="WT")
+      dat <- aggregate(Hour ~ Date, dat, sum)
       newLine <- data.frame(Date=today, Hour=dat$Hour)
     }
     spDayData <-  rbind(spDayData, newLine) 
