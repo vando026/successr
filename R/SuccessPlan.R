@@ -47,7 +47,7 @@ calcTime <- function(dat) {
     dat 
 }
 # debugonce(calcTime)
-dat=calcTime(spData)
+# dat=calcTime(spData)
 
 getTime <- function(out, x) {
   if(is.null(out) || any(out$Task %in% x)==FALSE) {
@@ -63,25 +63,20 @@ getTime <- function(out, x) {
 
 writeDay <- function(dat, spDayData) {
   isToday <- any(today %in% spDayData$Date) 
-  if(isToday==FALSE) { 
-    if(is.null(dat)) {
-      newLine <- data.frame(Date=today, Hour=0)
-    } else if(!is.null(dat)) {
-      dat <- subset(dat, Task!="WT")
-      dat <- aggregate(Hour ~ Date, dat, sum)
-      newLine <- data.frame(Date=today, Hour=dat$Hour)
-    }
-    spDayData <-  rbind(spDayData, newLine) 
-  } else if (!is.null(dat) && isToday==TRUE) {
+  if(!is.null(dat)) { 
     dat <- subset(dat, Task!="WT")
-    dat <- aggregate(Hour ~ Date, dat, sum)
-    spDayData$Hour[spDayData$Date==today] <- dat$Hour
-  } 
+    Hour <- aggregate(Hour ~ Date, dat, sum)$Hour
+  }
+  if(isToday==FALSE) {
+    newLine <- data.frame(Date=today, Hour=0)
+    spDayData <-  rbind(spDayData, newLine) 
+  } else {
+    spDayData$Hour[spDayData$Date==today] <- Hour
+  }
   spDayData 
 }
 # debugonce(writeDay)
 # yes <- writeDay(tt, spDayData)
-
 
 calcWeek <- function(dat) {
   dat <- subset(dat, Date > (today-7))
@@ -93,7 +88,7 @@ calcWeek <- function(dat) {
   dat
 }
 # debugonce(calcWeek)
-spDayData1 <- calcWeek(spDayData)
+# spDayData1 <- calcWeek(spDayData)
 
 calcMonth <- function(dat) {
   dat <- subset(dat, Date > (today-31))
@@ -123,7 +118,7 @@ doPlot <- function(sp_rfile) {
   f
 }
 # debugonce(doPlot)
-doPlot(sp_rfile)
+# doPlot(sp_rfile)
 
 
 callCalc <- function(spData) {
@@ -165,6 +160,7 @@ gEditButton <- function(sp_rfile) {
   size(Gedit) <- list(width=80, 
     height=300, column.widths=c(70, 30))
   dfi <- 11
+  rownames(spData) <- seq(nrow(spData))
   DF <- gdf(tail(spData, dfi), cont=Gedit)
   addHandlerChanged(DF, handler = function(h ,...) {
     newDF <- DF[]
@@ -236,7 +232,6 @@ e_act <- gaction("Edit", icon="editor", handler=function(...) gEditButton(sp_rfi
 Edit <- gbutton(action=e_act, cont=sp_f2, expand=TRUE, fill='y')
 addSpace(sp_f2, 0.0)
 f3 <- ggroup(horizontal=FALSE, spacing=10, cont=sp_g0)
-
 
 sp_out <- ggroup(label='Last Week', horizontal=TRUE, 
   spacing=10, cont=notebook)
