@@ -1,4 +1,4 @@
-## Description: 
+## Description: The Ultimate Success Plan
 ## Project: 
 ## Author: AV / Created: 11Jan2017 
 
@@ -7,20 +7,24 @@ require(gWidgets2, quietly=TRUE, warn.conflicts = TRUE)
 require(gWidgets2RGtk2, quietly=TRUE, warn.conflicts = TRUE)
 options (guiToolkit="RGtk2" )
 
+
 # Files
 sp_fname<- file.path(Sys.getenv("USERPROFILE"), "Dropbox/R/SuccessPlan")
 sp_tfile <- file.path(sp_fname, "TimeSheetR.csv")
 sp_rfile <- file.path(sp_fname, "TimeSheet.Rdata")
+sp_dfile <- file.path(sp_fname, "spDayData.csv")
 
 today <- as.Date(Sys.time())
-load(sp_rfile)
 
+load(sp_rfile)
 # spData <- read.csv(sp_tfile, header=TRUE)
+# spDayData <- read.csv(sp_dfile, header=TRUE)
 # spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01') )
 # spData <- transform(spData, Task=factor(Task, levels=c("P1", "P2", "WT", "ST")))
 # dat=calcTime(spData)
 # dat <- subset(dat, Task!="WT")
 # spDayData <- aggregate(Hour ~ Date, dat, sum)
+# spDayData <- transform(spDayData, Date=as.Date(Date,origin="1970-01-01"))
 # save(list=c("spData", "spDayData"), file=sp_rfile)
 
 #### Format Time 
@@ -35,13 +39,14 @@ sp_fmt <- function(x) {
 # x=sp_fmt(c(1.2, 3.8))
 
 calcTime <- function(dat) {
+    if(is.null(dat) || nrow(dat)==0) return(NULL)
     dat <- subset(dat, as.Date(Time)==today)
-    if(nrow(dat)<=1) return(NULL)
     Seconds <- as.numeric(dat$Time)
     Hour <- round(diff(Seconds)/(60*60), 2)
     dat <- transform(dat, Hour=c(Hour, NA),
       Date=as.Date(Time))
     dat <- subset(dat, Task!="ST")
+    if(nrow(dat)<2) return(NULL)
     dat <- aggregate(Hour ~ Task + Date, dat, sum, na.action=na.omit)
     dat <- transform(dat, HourP=round((Hour/sum(Hour))*100, 1))
     dat 
@@ -66,12 +71,19 @@ writeDay <- function(dat, spDayData) {
   if(!is.null(dat)) { 
     dat <- subset(dat, Task!="WT")
     Hour <- aggregate(Hour ~ Date, dat, sum)$Hour
-  }
-  if(isToday==FALSE) {
-    newLine <- data.frame(Date=today, Hour=0)
-    spDayData <-  rbind(spDayData, newLine) 
-  } else {
-    spDayData$Hour[spDayData$Date==today] <- Hour
+    if (isToday==TRUE) {
+      spDayData$Hour[spDayData$Date==today] <- Hour
+    } else {
+      newLine <- data.frame(Date=today, Hour=Hour)
+      spDayData <-  rbind(spDayData, newLine) 
+    }
+  } else if(is.null(dat)) {
+    if (isToday==TRUE) {
+      spDayData$Hour[spDayData$Date==today] <- 0
+    } else {
+      newLine <- data.frame(Date=today, Hour=0)
+      spDayData <-  rbind(spDayData, newLine) 
+    } 
   }
   spDayData 
 }
@@ -110,15 +122,15 @@ doPlot <- function(sp_rfile) {
   png(f, units="in",
        width=3.6, height=1.8, pointsize=8, res=100, type="cairo")
   par(mar=c(2.7, 5.0, 0, 0.4))
-  with(out, barplot(Hour, horiz=TRUE, col=rep(c("seagreen1", "seagreen3"), 2), 
-    names.arg=Week, las=1))
+  with(out, barplot(Hour, horiz=TRUE, col=rep(c("seagreen1", "seagreen3"), 2),
+  names.arg=Week, las=1))
   Bar4 <- ifelse(out[4, "Hour"] < 10, 4, 2)
   with(out, text(Hour , c(0.7, 1.8, 3, 4.2), labels=HourF, pos=c(rep(2,3),Bar4), adj=1))
   dev.off()
   f
 }
 # debugonce(doPlot)
-# doPlot(sp_rfile)
+doPlot(sp_rfile)
 
 
 callCalc <- function(spData) {
@@ -170,6 +182,7 @@ gEditButton <- function(sp_rfile) {
     } else {
       spData <- rbind(spData[1:(dfn-(dfi+1)), ], newDF)
     }
+    spData <- data.frame(spData)
     callCalc(spData)
   })
 }
