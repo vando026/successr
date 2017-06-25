@@ -10,22 +10,11 @@ options (guiToolkit="RGtk2" )
 
 # Files
 sp_fname<- file.path(Sys.getenv("USERPROFILE"), "Dropbox/R/SuccessPlan")
-sp_tfile <- file.path(sp_fname, "TimeSheetR.csv")
 sp_rfile <- file.path(sp_fname, "TimeSheet.Rdata")
-sp_dfile <- file.path(sp_fname, "spDayData.csv")
-
+# save(list=c("spData", "spDayData"), file=sp_rfile)
 today <- as.Date(Sys.time())
 
 load(sp_rfile)
-# spData <- read.csv(sp_tfile, header=TRUE)
-# spDayData <- read.csv(sp_dfile, header=TRUE)
-# spData <- transform(spData, Time=as.POSIXlt(Time, origin='1970-01-01') )
-# spData <- transform(spData, Task=factor(Task, levels=c("P1", "P2", "WT", "ST")))
-# dat=calcTime(spData)
-# dat <- subset(dat, Task!="WT")
-# spDayData <- aggregate(Hour ~ Date, dat, sum)
-# spDayData <- transform(spDayData, Date=as.Date(Date,origin="1970-01-01"))
-# save(list=c("spData", "spDayData"), file=sp_rfile)
 
 #### Format Time 
 sp_fmt <- function(x) {
@@ -35,8 +24,6 @@ sp_fmt <- function(x) {
   out <- paste(fhour, fmin, sep=':')
   out 
 }
-# debugonce(sp_fmt)
-# x=sp_fmt(c(1.2, 3.8))
 
 calcTime <- function(dat) {
     if(is.null(dat) || nrow(dat)==0) return(NULL)
@@ -130,7 +117,7 @@ doPlot <- function(sp_rfile) {
   f
 }
 # debugonce(doPlot)
-doPlot(sp_rfile)
+# doPlot(sp_rfile)
 
 
 callCalc <- function(spData) {
