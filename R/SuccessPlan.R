@@ -3,8 +3,8 @@
 ## Author: AV / Created: 11Jan2017 
 
 # Packages
-require(gWidgets2, quietly=TRUE, warn.conflicts = TRUE)
-require(gWidgets2RGtk2, quietly=TRUE, warn.conflicts = TRUE)
+library(gWidgets2, quietly=TRUE, warn.conflicts = TRUE)
+library(gWidgets2RGtk2, quietly=TRUE, warn.conflicts = TRUE)
 options (guiToolkit="RGtk2" )
 
 
