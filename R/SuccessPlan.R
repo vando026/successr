@@ -142,7 +142,7 @@ doButton <- function(h, ...) {
     sapply(obj, function(i) { ii <- get(i, envir=globalenv())
       font(ii) <- list(weight="normal", size=10, color="black")})
   }
-  ifelse(h$action=="ST", toggleOff(ggNames), toggleOff(setdiff(ggNames, h$action)))
+  toggleOff(ggNames)
   if(h$action!="ST") font(h$obj) <- list(weight="bold", size=12, color="red")
    
   # Write to time data file
@@ -226,12 +226,10 @@ sp_f2 <- ggroup(horizontal=FALSE, spacing=8, cont=sp_g0)
 addSpace(sp_f2, 3)
 ST <- gbutton("Stop", cont=sp_f2, expand=TRUE, fill='y',
   handler=doButton, action="ST")
-# r_act <- gaction("Report", icon="overview", handler=function(...) lastWkUpdate(sp_rfile))
-rweek <- gbutton("Overview", action="Report", cont=sp_f2, expand=TRUE, fill='y',
-  function(...) lastWkUpdate(sp_rfile))
-# e_act <- gaction("Edit", icon="editor", handler=function(...) gEditButton(sp_rfile))
-Edit <- gbutton("Edit", action="Edit", cont=sp_f2, expand=TRUE, fill='y', 
-  handler=function(...) gEditButton(sp_rfile))
+r_act <- gaction("Report", icon="overview", handler=function(...) lastWkUpdate(sp_rfile))
+rweek <- gbutton(action=r_act, cont=sp_f2, expand=TRUE, fill='y')
+e_act <- gaction("Edit", icon="editor", handler=function(...) gEditButton(sp_rfile))
+Edit <- gbutton(action=e_act, cont=sp_f2, expand=TRUE, fill='y')
 addSpace(sp_f2, 0.0)
 f3 <- ggroup(horizontal=FALSE, spacing=10, cont=sp_g0)
 
