@@ -140,10 +140,10 @@ callCalc <- function(spData) {
 doButton <- function(h, ...) {
   toggleOff <- function(obj) {
     sapply(obj, function(i) { ii <- get(i, envir=globalenv())
-      font(ii) <- list(weight="normal", size=10)})
+      font(ii) <- list(weight="normal", size=10, color="black")})
   }
   ifelse(h$action=="ST", toggleOff(ggNames), toggleOff(setdiff(ggNames, h$action)))
-  if(h$action!="ST") font(h$obj) <- list(weight="bold", size=12)
+  if(h$action!="ST") font(h$obj) <- list(weight="bold", size=12, color="red")
    
   # Write to time data file
   load(sp_rfile)
