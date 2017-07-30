@@ -79,6 +79,7 @@ writeDay <- function(dat, spDayData) {
 
 calcWeek <- function(dat) {
   dat <- subset(dat, Date > (today-7))
+  if(is.null(dat) || nrow(dat)==0) return(NULL)
   dat <- transform(dat, Day = format(Date, "%a"))
   dat <- transform(dat, Week=paste0("Week",
     as.numeric(format(Date, "%U"))))
@@ -244,6 +245,8 @@ size(sp_o1) <- list(width=250, height=220, column.widths=c(90, 70, 50, 40))
 sp_gr <- ggroup(cont=out0, horizontal=TRUE, spacing=0)
 img <- doPlot(sp_rfile) 
 img_out <- gimage(basename(img),dirname(img), cont = out0)
+
+# doButton("Stop")
 
 svalue(notebook) <- 1
 visible(window) <- TRUE
