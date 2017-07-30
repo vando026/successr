@@ -79,7 +79,9 @@ writeDay <- function(dat, spDayData) {
 
 calcWeek <- function(dat) {
   dat <- subset(dat, Date > (today-7))
-  if(is.null(dat) || nrow(dat)==0) return(NULL)
+  if(is.null(dat) || nrow(dat)==0) {
+    dat <- data.frame(Date=today, Hour=0.00) 
+  }
   dat <- transform(dat, Day = format(Date, "%a"))
   dat <- transform(dat, Week=paste0("Week",
     as.numeric(format(Date, "%U"))))
@@ -91,12 +93,15 @@ calcWeek <- function(dat) {
 # spDayData1 <- calcWeek(spDayData)
 
 calcMonth <- function(dat) {
-  dat <- subset(dat, Date > (today-31))
   dat <- transform(dat, Week=as.numeric(format(Date, "%U")))
-  maxWk <- max(dat$Week)
-  dat <- subset(dat, Week %in% c((maxWk-3):maxWk))
+  lastMnth <- max(dat$Week)
+  dat4 <- data.frame(Week =c((lastMnth-3):lastMnth))
+  dat <- subset(dat, Date > (today-28))
   dat <- aggregate(Hour ~ Week, data=dat, sum)
-  dat <- transform(dat, HourF=sp_fmt(Hour), 
+  dat <- merge(dat4, dat, by="Week", all.x=TRUE)
+  dat <- transform(dat, 
+    Hour=ifelse(!is.na(Hour), Hour, 0.00),
+    HourF=ifelse(!is.na(Hour), sp_fmt(Hour), "0:00"),
     Week=paste0("Week", Week))
   dat
 }
@@ -246,7 +251,7 @@ sp_gr <- ggroup(cont=out0, horizontal=TRUE, spacing=0)
 img <- doPlot(sp_rfile) 
 img_out <- gimage(basename(img),dirname(img), cont = out0)
 
-# doButton("Stop")
+# doButton("Stop", action="ST")
 
 svalue(notebook) <- 1
 visible(window) <- TRUE
