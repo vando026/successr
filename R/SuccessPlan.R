@@ -245,6 +245,7 @@ out0 <- ggroup(horizontal=TRUE, cont=sp_out)
 sp_DF <- calcWeek(spDayData)
 sp_o1 <- gtable(sp_DF, cont = out0, expand=FALSE)
 size(sp_o1) <- list(width=250, height=220, column.widths=c(90, 70, 50, 40))
+addSpace(sp_out, 1)
 
 # Plots
 sp_gr <- ggroup(cont=out0, horizontal=TRUE, spacing=0)
