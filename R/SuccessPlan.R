@@ -159,23 +159,15 @@ doButton <- function(h, ...) {
 }
 
 gEditButton <- function(sp_rfile) {
-# browser()
   load(sp_rfile)
   Gedit <- gwindow("Data Editor") 
   size(Gedit) <- list(width=80, 
     height=300, column.widths=c(70, 30))
   dfi <- 30
   rownames(spData) <- seq(nrow(spData))
-  DF <- gdf(tail(spData, dfi), cont=Gedit)
+  DF <- gdf(spData, cont=Gedit)
   addHandlerChanged(DF, handler = function(h ,...) {
-    newDF <- DF[]
-    dfn <- nrow(spData); 
-    if(dfn<dfi) {
-      spData <- newDF 
-    } else {
-      spData <- rbind(spData[1:(dfn-(dfi+1)), ], newDF)
-    }
-    spData <- data.frame(spData)
+    spData <- data.frame(DF[])
     callCalc(spData)
   })
 }
