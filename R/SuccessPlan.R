@@ -164,7 +164,7 @@ gEditButton <- function(sp_rfile) {
   Gedit <- gwindow("Data Editor") 
   size(Gedit) <- list(width=80, 
     height=300, column.widths=c(70, 30))
-  dfi <- 11
+  dfi <- 30
   rownames(spData) <- seq(nrow(spData))
   DF <- gdf(tail(spData, dfi), cont=Gedit)
   addHandlerChanged(DF, handler = function(h ,...) {
