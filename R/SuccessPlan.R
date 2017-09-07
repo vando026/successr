@@ -9,6 +9,7 @@ options (guiToolkit="RGtk2" )
 
 
 # Files
+# This is where R will write the files to: change to your folder
 sp_fname<- file.path(Sys.getenv("USERPROFILE"), "Dropbox/R/SuccessPlan")
 sp_rfile <- file.path(sp_fname, "TimeSheet.Rdata")
 # save(list=c("spData", "spDayData"), file=sp_rfile)
