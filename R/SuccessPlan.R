@@ -33,6 +33,7 @@ if(!file.exists(day_file)) {
 
 # Read in the data
 load(time_file)
+
 DayData <- read.csv(day_file,
   colClasses=c("Date", "numeric"))
 
@@ -278,7 +279,6 @@ sp_gr <- ggroup(cont=out0, horizontal=TRUE, spacing=0)
 img <- doPlot(day_file) 
 img_out <- gimage(basename(img),dirname(img), cont = out0)
 
-# doButton("Stop", action="ST")
 
 svalue(notebook) <- 1
 visible(window) <- TRUE
