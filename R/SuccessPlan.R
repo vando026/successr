@@ -34,8 +34,8 @@ if(!file.exists(day_file)) {
 # Read in the data
 load(time_file)
 
-DayData <- read.csv(day_file,
-  colClasses=c("Date", "numeric"))
+# DayData <- read.csv(day_file,
+#   colClasses=c("Date", "numeric"))
 
 #### Format Time 
 sp_fmt <- function(x) {
@@ -49,33 +49,45 @@ sp_fmt <- function(x) {
 # This is the main time calc function
 calcTime <- function(dat) {
     if(is.null(dat) || nrow(dat)==0) return(NULL)
-    dat <- subset(dat, as.Date(Time)==today)
     Seconds <- as.numeric(dat$Time)
     Hour <- round(diff(Seconds)/(60*60), 2)
     dat <- transform(dat, Hour=c(Hour, NA),
       Date=as.Date(Time))
     dat <- subset(dat, Task!="ST")
-    if(nrow(dat)<2) return(NULL)
-    dat <- aggregate(Hour ~ Task + Date, dat, sum, na.action=na.omit)
-    dat <- transform(dat, HourP=round((Hour/sum(Hour))*100, 1))
+    if(nrow(dat)==0 || (nrow(dat)==1 & is.na(dat$Hour))) {
+      return(NULL)
+    }
+    dat <- aggregate(Hour ~ Task + Date, dat, sum, 
+      na.action=na.omit)
+    dat <- transform(dat, 
+      HourP=round((Hour/sum(Hour))*100, 1))
     dat 
 }
 # debugonce(calcTime)
 # dat=calcTime(spData)
 
-getTime <- function(out, x) {
-  if(is.null(out) || any(out$Task %in% x)==FALSE) {
-    Hour <- HourP <- 0 
-  } else {
-    Hour <- out[out$Task %in% x, "Hour"] 
-    HourP <- out[out$Task %in% x, "HourP"] 
+# Format time for GUI
+updateGuiTime <- function(dat) {
+  getTime <- function(dat, i) {
+    if(is.null(dat) || any(dat$Task %in% i)==FALSE) {
+      Hour <- HourP <- 0 
+    } else {
+      Hour <- dat[dat$Task %in% i, "Hour"] 
+      HourP <- dat[dat$Task %in% i, "HourP"] 
+    }
+    paste0(sp_fmt(Hour),"Hrs (",HourP,"%)")
   }
-  paste0(sp_fmt(Hour),"Hrs (",HourP,"%)")
+  for(i in ggNames) {
+    Label <- get(paste0(i,"L"), envir=globalenv()) 
+    svalue(Label) <- getTime(dat, i)
+  } 
 }
 # getTime(tt, "P1" )
 
 
-writeDay <- function(dat, DayData) {
+writeDay <- function(dat, day_file) {
+  DayData <- read.csv(day_file,
+    colClasses=c("Date", "numeric"))
   isToday <- any(today %in% DayData$Date) 
   if(!is.null(dat)) { 
     dat <- subset(dat, Task!="WT")
@@ -98,12 +110,15 @@ writeDay <- function(dat, DayData) {
       DayData <-  rbind(DayData, newLine) 
     } 
   }
-  DayData 
+  write.csv(DayData, file=file.path(day_file), 
+    row.names=FALSE)
 }
 # debugonce(writeDay)
 # yes <- writeDay(tt, DayData)
 
-calcWeek <- function(dat) {
+calcWeek <- function(day_file) {
+  dat <- read.csv(day_file,
+    colClasses=c("Date", "numeric"))
   dat <- subset(dat, Date > (today-7))
   if(is.null(dat) || nrow(dat)==0) {
     dat <- data.frame(Date=today, Hour=0.00) 
@@ -161,57 +176,41 @@ doPlot <- function(day_file) {
 # doPlot(day_file)
 
 
-callCalc <- function(spData) {
-  cdat <- calcTime(spData)
-  DayData <- writeDay(cdat, DayData)
-  spData <- subset(spData, as.Date(Time)==today)
-  # Update GUI
-  sapply(ggNames, function(i) {
-    ii <- get(paste0(i,"L"), envir=globalenv()) 
-    svalue(ii) <- getTime(cdat, i)}) 
-  save("spData", file=time_file)
-  write.csv(DayData, file=file.path(day_file), 
-    row.names=FALSE)
-}
-# debugonce(callCalc)
-# callCalc(spData)
-
 doButton <- function(h, ...) {
-  toggleOff <- function(obj) {
-    sapply(obj, function(i) { ii <- get(i, envir=globalenv())
-      font(ii) <- list(weight="normal", size=10, color="black")})
-  }
-  toggleOff(ggNames)
+  sapply(ggNames, function(i) {
+    ii <- get(i, envir=globalenv())
+    font(ii) <- list(weight="normal", size=10, color="black")})
   if(h$action!="ST") font(h$obj) <- list(weight="bold", size=12, color="red")
    
-  # Write to time data file
-  load(time_file)
+  # Calc and Write time 
+  load(time_file, envir=environment())
   aLine <- data.frame(Time=Sys.time(), Task=h$action)
   spData <- rbind(spData, aLine)
-  callCalc(spData)
+  spData <- subset(spData, as.Date(Time)==today)
+  save("spData", file=time_file)
+  time_dat <- calcTime(spData)
+  updateGuiTime(time_dat)
+  writeDay(time_dat, day_file)
 }
 # debugonce(doButton)
 
 gEditButton <- function(time_file) {
-  load(time_file)
   Gedit <- gwindow("Data Editor") 
   size(Gedit) <- list(width=80, 
     height=300, column.widths=c(70, 30))
   rownames(spData) <- seq(nrow(spData))
+  load(time_file)
   DF <- gdf(spData, cont=Gedit)
   addHandlerChanged(DF, handler = function(h ,...) {
     spData <- data.frame(DF[])
-    callCalc(spData)
-  })
+    save("spData", file=time_file)})
 }
 # debugonce(gEditButton)
 # gEditButton(time_file)
 
 
 lastWkUpdate <- function(day_file) {
-  DayData <- read.csv(day_file,
-    colClasses=c("Date", "numeric"))
-  sp_DF <- calcWeek(DayData)
+  sp_DF <- calcWeek(day_file)
   sp_o1[] <- sp_DF
   svalue(img_out) <- doPlot(day_file)
   svalue(notebook) <- 2
@@ -269,7 +268,7 @@ f3 <- ggroup(horizontal=FALSE, spacing=10, cont=sp_g0)
 sp_out <- ggroup(label='Last Week', horizontal=TRUE, 
   spacing=10, cont=notebook)
 out0 <- ggroup(horizontal=TRUE, cont=sp_out)
-sp_DF <- calcWeek(DayData)
+sp_DF <- calcWeek(day_file)
 sp_o1 <- gtable(sp_DF, cont = out0, expand=FALSE)
 size(sp_o1) <- list(width=250, height=220, column.widths=c(90, 70, 50, 40))
 addSpace(sp_out, 1)
