@@ -31,12 +31,6 @@ if(!file.exists(day_file)) {
     row.names=FALSE)
 }
 
-# Read in the data
-load(time_file)
-
-# DayData <- read.csv(day_file,
-#   colClasses=c("Date", "numeric"))
-
 #### Format Time 
 sp_fmt <- function(x) {
   fhour <- x %/% 1
@@ -198,11 +192,12 @@ gEditButton <- function(time_file) {
   Gedit <- gwindow("Data Editor") 
   size(Gedit) <- list(width=80, 
     height=300, column.widths=c(70, 30))
-  rownames(spData) <- seq(nrow(spData))
   load(time_file)
+  rownames(spData) <- seq(nrow(spData))
   DF <- gdf(spData, cont=Gedit)
   addHandlerChanged(DF, handler = function(h ,...) {
     spData <- data.frame(DF[])
+    updateGuiTime(time_dat)
     save("spData", file=time_file)})
 }
 # debugonce(gEditButton)
@@ -224,7 +219,8 @@ window <- gwindow("The Ultimate Success Plan",
 
 # This makes the tabs
 notebook <- gnotebook (cont = window )
-sp_g0 <- ggroup(label='Main', horizontal=TRUE, spacing=10, cont=notebook)
+sp_g0 <- ggroup(label='Main', horizontal=TRUE, 
+  spacing=10, cont=notebook)
 
 sp_f0 <- ggroup(horizontal=FALSE, spacing=0, cont=sp_g0)
 sp_f1 <- ggroup(horizontal=TRUE, expand=TRUE, fill='x', 
@@ -245,7 +241,8 @@ for(i in seq(3)) {
     do.call("ggroup", ggList))
   gi <- get(paste0(ggNames[i],"G"), envir=environment())
   addSpace(gi, 5)
-  assign(ggNames[i], gbutton(ggLabels[i], cont=gi, expand=TRUE, fill="y",
+  assign(ggNames[i], gbutton(ggLabels[i], 
+    cont=gi, expand=TRUE, fill="y",
     handler=doButton, action=ggNames[i]))
   size(gi) <- c(70, 100)
   sep <- gseparator(cont=gi)
@@ -258,9 +255,11 @@ sp_f2 <- ggroup(horizontal=FALSE, spacing=8, cont=sp_g0)
 addSpace(sp_f2, 3)
 ST <- gbutton("Stop", cont=sp_f2, expand=TRUE, fill='y',
   handler=doButton, action="ST")
-r_act <- gaction("Report", icon="overview", handler=function(...) lastWkUpdate(day_file))
+r_act <- gaction("Report", icon="overview", 
+  handler=function(...) lastWkUpdate(day_file))
 rweek <- gbutton(action=r_act, cont=sp_f2, expand=TRUE, fill='y')
-e_act <- gaction("Edit", icon="editor", handler=function(...) gEditButton(time_file))
+e_act <- gaction("Edit", icon="editor", 
+  handler=function(...) gEditButton(time_file))
 Edit <- gbutton(action=e_act, cont=sp_f2, expand=TRUE, fill='y')
 addSpace(sp_f2, 0.0)
 f3 <- ggroup(horizontal=FALSE, spacing=10, cont=sp_g0)
@@ -270,7 +269,8 @@ sp_out <- ggroup(label='Last Week', horizontal=TRUE,
 out0 <- ggroup(horizontal=TRUE, cont=sp_out)
 sp_DF <- calcWeek(day_file)
 sp_o1 <- gtable(sp_DF, cont = out0, expand=FALSE)
-size(sp_o1) <- list(width=250, height=220, column.widths=c(90, 70, 50, 40))
+size(sp_o1) <- list(width=250, height=220, 
+  column.widths=c(90, 70, 50, 40))
 addSpace(sp_out, 1)
 
 # Plots
@@ -281,4 +281,9 @@ img_out <- gimage(basename(img),dirname(img), cont = out0)
 
 svalue(notebook) <- 1
 visible(window) <- TRUE
+
+###############################################################################################
+###############################################################################################
+###############################################################################################
+
 
