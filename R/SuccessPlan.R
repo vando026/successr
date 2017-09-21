@@ -10,7 +10,7 @@ options (guiToolkit="RGtk2" )
 # Get configuration settings
 pkg_path <- dirname(getSrcDirectory(function(x) {x}))
 config_path <- file.path(pkg_path, "config.R") 
-source(config_path)
+source(config_path, local=TRUE)
 
 # Set data path
 if(data_path=="") 
@@ -160,7 +160,8 @@ doPlot <- function(day_file) {
   with(out, barplot(Hour60, horiz=TRUE, 
     col=rep(c("seagreen1", "seagreen3"), 2),
     names.arg=Week, las=1))
-  label_pos <- ifelse((out$Hour/max(out$Hour)) < 0.2, 4, 2)
+  maxHour <- max(out$Hour)
+  label_pos <- ifelse((out$Hour/maxHour < 0.2) || maxHour==0, 4, 2)
   with(out, text(Hour60 , c(0.7, 1.8, 3, 4.2), 
     labels=HourF, pos=label_pos, adj=1))
   dev.off()
@@ -214,7 +215,7 @@ lastWkUpdate <- function(day_file) {
 ###############################################################################################
 ######################################## LAYOUT ###############################################
 ###############################################################################################
-window <- gwindow("The Ultimate Success Plan", 
+window <- gwindow(Window_title, 
   width=620, height=240, visible=FALSE)
 
 # This makes the tabs
@@ -243,7 +244,7 @@ for(i in seq(3)) {
   addSpace(gi, 5)
   assign(ggNames[i], gbutton(ggLabels[i], 
     cont=gi, expand=TRUE, fill="y",
-    handler=doButton, action=ggNames[i]))
+    handler=doButton, action=ggLabels[i]))
   size(gi) <- c(70, 100)
   sep <- gseparator(cont=gi)
   assign(paste0(ggNames[i],"L"), 
