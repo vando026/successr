@@ -175,7 +175,7 @@ doButton <- function(h, ...) {
   sapply(ggNames, function(i) {
     ii <- get(i, envir=globalenv())
     font(ii) <- list(weight="normal", size=10, color="black")})
-  if(h$action!="ST") font(h$obj) <- list(weight="bold", size=12, color="red")
+  if(h$action!="Stop") font(h$obj) <- list(weight="bold", size=12, color="red")
    
   # Calc and Write time 
   load(time_file, envir=environment())
@@ -255,7 +255,7 @@ for(i in seq(3)) {
 sp_f2 <- ggroup(horizontal=FALSE, spacing=8, cont=sp_g0)
 addSpace(sp_f2, 3)
 ST <- gbutton("Stop", cont=sp_f2, expand=TRUE, fill='y',
-  handler=doButton, action="ST")
+  handler=doButton, action="Stop")
 r_act <- gaction("Report", icon="overview", 
   handler=function(...) lastWkUpdate(day_file))
 rweek <- gbutton(action=r_act, cont=sp_f2, expand=TRUE, fill='y')
