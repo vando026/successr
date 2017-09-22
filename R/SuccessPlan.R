@@ -12,6 +12,11 @@ pkg_path <- dirname(getSrcDirectory(function(x) {x}))
 config_path <- file.path(pkg_path, "config.R") 
 source(config_path, local=TRUE)
 
+ggNames <- ggLabels <- c(Button_label_1, 
+  Button_label_2, Button_label_3)
+if(any(!is.character(ggNames)))
+  stop("Bad config.R setting")
+
 # Set data path
 if(data_path=="") 
   data_path <- file.path(pkg_path, 'data')
@@ -22,7 +27,7 @@ today <- as.Date(Sys.time())
 
 # Create files if they do not exist
 if(!file.exists(time_file)) {
-  spData <- data.frame(Time=Sys.time(), Task="ST")
+  spData <- data.frame(Time=Sys.time(), Task="Stop")
   save("spData", file=time_file)
 }
 if(!file.exists(day_file)) {
@@ -63,6 +68,7 @@ calcTime <- function(dat) {
 # Format time for GUI
 updateGuiTime <- function(dat) {
   getTime <- function(dat, i) {
+  # browser()
     if(is.null(dat) || any(dat$Task %in% i)==FALSE) {
       Hour <- HourP <- 0 
     } else {
@@ -84,7 +90,7 @@ writeDay <- function(dat, day_file) {
     colClasses=c("Date", "numeric"))
   isToday <- any(today %in% DayData$Date) 
   if(!is.null(dat)) { 
-    dat <- subset(dat, Task!="WT")
+    dat <- subset(dat, Task!=Button_label_3)
     if(nrow(dat)==0) {
       Hour <- 0 
     } else {
@@ -161,7 +167,7 @@ doPlot <- function(day_file) {
     col=rep(c("seagreen1", "seagreen3"), 2),
     names.arg=Week, las=1))
   maxHour <- max(out$Hour)
-  label_pos <- ifelse((out$Hour/maxHour < 0.2) || maxHour==0, 4, 2)
+  label_pos <- ifelse((out$Hour/maxHour < 0.2) | maxHour==0, 4, 2)
   with(out, text(Hour60 , c(0.7, 1.8, 3, 4.2), 
     labels=HourF, pos=label_pos, adj=1))
   dev.off()
@@ -182,6 +188,7 @@ doButton <- function(h, ...) {
   aLine <- data.frame(Time=Sys.time(), Task=h$action)
   spData <- rbind(spData, aLine)
   spData <- subset(spData, as.Date(Time)==today)
+  spData$Task  <- as.character(spData$Task)
   save("spData", file=time_file)
   time_dat <- calcTime(spData)
   updateGuiTime(time_dat)
@@ -198,6 +205,7 @@ gEditButton <- function(time_file) {
   DF <- gdf(spData, cont=Gedit)
   addHandlerChanged(DF, handler = function(h ,...) {
     spData <- data.frame(DF[])
+    time_dat <- calcTime(spData)
     updateGuiTime(time_dat)
     save("spData", file=time_file)})
 }
@@ -230,11 +238,6 @@ sp_f1 <- ggroup(horizontal=TRUE, expand=TRUE, fill='x',
 # Set the paramaters of the ggGroups
 ggList <- list(horizontal = FALSE, spacing=5, 
   expand=TRUE, fill='x', cont = sp_f1)
-
-# Iterate through names
-ggNames <- c("P1", "P2", "WT")
-ggLabels <- c(Button_label_1, 
-  Button_label_2, "Wasted Time")
 
 # Now do all settings for buttons
 for(i in seq(3)) {
@@ -287,4 +290,36 @@ visible(window) <- TRUE
 ###############################################################################################
 ###############################################################################################
 
+#' @title The Ultimate Success Plan
+#' 
+#' @description  To track the amount of wasted time during the work day.
+#' 
+#' @details The Ultimate Success Plan is a tool that quantifies the amount of time you
+#' waste during the day. The principle is that you can't become effective until you
+#' realise how ineffecive you are. Time can be divided into two general categories:
+#' Working time and Wasted time. Working time is quantified through the Project 1 and
+#' Project 2 buttons.  These are whatever projects you think are relevant for the day.
+#' Wasted time includes anything that does not fall in Project 1 or Project 2. Culprits
+#' for Wasted Time are typically toilet/cigarette/watercooler excursions, lunch breaks,
+#' unannounced visits by the boss, any meeting, internet surfing, chit chat with colleagues,
+#' or courtesy calls by family and/or partner(s).
+#' 
+#' @param verbose prints out configuration settings, else set to \code{\link{FALSE}}
+#' @param Button_label_1 Label for Button 1. Default is "Project 1". Can only be changed
+#' in the config.R file in the "SuccessPlan" folder.
+#' @param Button_label_2 Label for Button 2. Default is "Project 2". 
+#' @param Button_label_3 Label for Button 3. It is strongly advised to use the default
+#' label "Wasted Time". 
+#' @param data_path Path where the data will be written to. The default setting is the data folder in the
+#' \code{"SuccessPlan"} package. The path can only be set in the config.R file. 
+#' @param window_title Window title. Can only be changed in the config.R file.
+#' title
+#'
+#' @return none
+#'
+#' @export
+successPlan <- function(verbose=TRUE) { source(file.path(pkg_path, 'R/SuccessPlan.R'))
+cat(' Configuration settings\n', '  Button 1: ', Button_label_1, "\n", '  Button 2: ',
+Button_label_2, "\n", '  Button 3: ', Button_label_3, "\n", '  File path: ', data_path,
+"\n") }
 
