@@ -18,8 +18,9 @@ if(any(!is.character(ggNames)))
   stop("Bad config.R setting")
 
 # Set data path
-if(data_path=="") 
+if(data_path=="" || !dir.exists(data_path)) 
   data_path <- file.path(pkg_path, 'data')
+
 time_file <- file.path(data_path, "TimeSheet.Rdata")
 day_file <- file.path(data_path, "DayData.csv")
 
@@ -27,7 +28,8 @@ today <- as.Date(Sys.time())
 
 # Create files if they do not exist
 if(!file.exists(time_file)) {
-  spData <- data.frame(Time=Sys.time(), Task="Stop")
+  spData <- data.frame(Time=Sys.time(), Task="Stop", 
+    stringsAsFactors=FALSE)
   save("spData", file=time_file)
 }
 if(!file.exists(day_file)) {
@@ -68,7 +70,6 @@ calcTime <- function(dat) {
 # Format time for GUI
 updateGuiTime <- function(dat) {
   getTime <- function(dat, i) {
-  # browser()
     if(is.null(dat) || any(dat$Task %in% i)==FALSE) {
       Hour <- HourP <- 0 
     } else {
@@ -78,7 +79,7 @@ updateGuiTime <- function(dat) {
     paste0(sp_fmt(Hour),"Hrs (",HourP,"%)")
   }
   for(i in ggNames) {
-    Label <- get(paste0(i,"L"), envir=globalenv()) 
+    Label <- get(paste0(i,"L"), envir=environment()) 
     svalue(Label) <- getTime(dat, i)
   } 
 }
@@ -181,14 +182,14 @@ doButton <- function(h, ...) {
   sapply(ggNames, function(i) {
     ii <- get(i, envir=globalenv())
     font(ii) <- list(weight="normal", size=10, color="black")})
-  if(h$action!="Stop") font(h$obj) <- list(weight="bold", size=12, color="red")
+  if(h$action!="Stop")  
+    font(h$obj) <- list(weight="bold", size=12, color="red")
    
   # Calc and Write time 
   load(time_file, envir=environment())
   aLine <- data.frame(Time=Sys.time(), Task=h$action)
   spData <- rbind(spData, aLine)
   spData <- subset(spData, as.Date(Time)==today)
-  spData$Task  <- as.character(spData$Task)
   save("spData", file=time_file)
   time_dat <- calcTime(spData)
   updateGuiTime(time_dat)
@@ -223,11 +224,11 @@ lastWkUpdate <- function(day_file) {
 ###############################################################################################
 ######################################## LAYOUT ###############################################
 ###############################################################################################
-window <- gwindow(Window_title, 
+gWindow <- gwindow(Window_title, 
   width=620, height=240, visible=FALSE)
 
 # This makes the tabs
-notebook <- gnotebook (cont = window )
+notebook <- gnotebook (cont = gWindow )
 sp_g0 <- ggroup(label='Main', horizontal=TRUE, 
   spacing=10, cont=notebook)
 
@@ -241,9 +242,9 @@ ggList <- list(horizontal = FALSE, spacing=5,
 
 # Now do all settings for buttons
 for(i in seq(3)) {
-  assign(paste0(ggNames[i],"G"), 
-    do.call("ggroup", ggList))
-  gi <- get(paste0(ggNames[i],"G"), envir=environment())
+  bi <- paste0("B",i)
+  assign(bi, do.call("ggroup", ggList))
+  gi <- get(bi, envir=environment())
   addSpace(gi, 5)
   assign(ggNames[i], gbutton(ggLabels[i], 
     cont=gi, expand=TRUE, fill="y",
@@ -284,7 +285,7 @@ img_out <- gimage(basename(img),dirname(img), cont = out0)
 
 
 svalue(notebook) <- 1
-visible(window) <- TRUE
+visible(gWindow) <- TRUE
 
 ###############################################################################################
 ###############################################################################################
@@ -318,8 +319,25 @@ visible(window) <- TRUE
 #' @return none
 #'
 #' @export
-successPlan <- function(verbose=TRUE) { source(file.path(pkg_path, 'R/SuccessPlan.R'))
-cat(' Configuration settings\n', '  Button 1: ', Button_label_1, "\n", '  Button 2: ',
-Button_label_2, "\n", '  Button 3: ', Button_label_3, "\n", '  File path: ', data_path,
-"\n") }
+
+
+successPlan <- function(verbose=TRUE) { 
+  if(isExtant(gWindow)) dispose(gWindow)
+  source(file.path(pkg_path, 'R/SuccessPlan.R'), local=TRUE)
+  if(verbose==TRUE) {
+    cat(' Configuration settings\n', 
+    '  Button 1: ', Button_label_1, "\n", 
+    '  Button 2: ', Button_label_2, "\n", 
+    '  Button 3: ', Button_label_3, "\n", 
+    '  File path: ', dQuote(data_path), '\n') 
+  }
+}
+
+# tt <- function() {
+#   if(exists("gWindow", envir=globalenv()))
+#     dispose(gWindow)
+#   gWindow <<- gwindow("Window_title", 
+#     width=620, height=240, visible=TRUE)
+# }
+# tt()
 
