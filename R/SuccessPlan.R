@@ -1,7 +1,4 @@
-# Packages
-require(gWidgets2, quietly=TRUE, warn.conflicts = TRUE)
-require(gWidgets2RGtk2, quietly=TRUE, warn.conflicts = TRUE)
-options (guiToolkit="RGtk2" )
+options(guiToolkit="RGtk2" )
 
 #' @title The Ultimate Success Plan
 #' 
@@ -32,7 +29,7 @@ options (guiToolkit="RGtk2" )
 #' the Task (from a drop-down menu).  \code{DayData.csv} file in \code{data_path} allows
 #' you to edit the total time for a given day. 
 #'
-#' Requires \code{gWidgets2}, \code{gWidgets2RGtk2} and \code{dev_tools}. The package must
+#' Requires \code{gWidgets2RGtk2} and \code{dev_tools}. The package must
 #' be loaded with \code{load_all('path to the package folder')}.  The Ultimate Success
 #' Plan project is in the development phase, please report bugs to me by typing in the
 #' \code{R} console \code{packageDescription("successPlan")}.
@@ -44,6 +41,8 @@ options (guiToolkit="RGtk2" )
 #' tinkering with button labels. 
 #'
 #' @return none
+#'
+#' @import gWidgets2RGtk2
 #'
 #' @export
 

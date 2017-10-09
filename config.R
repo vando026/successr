@@ -1,6 +1,6 @@
 # file:config.R
 # keep data_path empty for the default setting
-data_path <- "~/Dropbox/R/SuccessPlan/data"
+data_path <- "~/Dropbox/R/successr/data"
 # Button labels must be stings
 Window_title <- "The Ultimate Success Plan"
 Button_label_1 <- "Project 1"
