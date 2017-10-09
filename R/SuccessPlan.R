@@ -10,39 +10,44 @@ options (guiToolkit="RGtk2" )
 #' @details You cannot be successful if you waste time. The Ultimate Success Plan is a
 #' tool for diagnosing the amount of time you waste during the day. Its aim is to finally
 #' convince you that you don't really work 8 hours a day.  At a metaphysical level, time
-#' can be divided into two categories: work time and wasted time. Work time is best used
-#' when you focus on one or two projects in the day. \code{Project 1} and/or \code{Project
-#' 2} are whatever projects you think are relevant.  \code{Wasted Time}
+#' can be divided into two categories: work time and wasted time. Work time is effectively
+#' used when you focus on one or two projects in the day. \code{Project 1} and/or
+#' \code{Project 2} are whatever projects you think are relevant.  \code{Wasted Time}
 #' includes anything that does not fall in \code{Project 1} and/or \code{Project 2}.
 #' Culprits for \code{Wasted Time} are typically toilet/cigarette/watercooler excursions,
 #' lunch breaks, unannounced visits by the boss, any meeting, internet surfing, chit chat
-#' with colleagues, or courtesy calls by telemarketers, family, and partner(s).
+#' with colleagues, or courtesy calls by telemarketers, friends/family, and partner(s).
 #' 
 #' Labels for \code{Project 1}, \code{Project 2}, and \code{Wasted Time} can only be
-#' changed in the config.R file. Use these default settings rather than waste time
-#' tinkering with button labels.  There is an option to set the \code{data_path} to where
-#' your data is stored. In my set-up, I put this package in my \code{R} library folder (see
-#' \code{print(.libPaths())} but write the data to my Dropbox folder so I can sync
-#' between my work and home computers. Things like the Window Title can be changed in the
-#' config.R file as well, but don't waste time doing this.  
+#' changed in the config.R file. But just use the default settings rather than waste time
+#' tinkering with button labels.  There is an option to set a personal \code{data_path} to
+#' where you want your data stored. In my set-up, I put this package in my \code{R}
+#' library folder (see \code{print(.libPaths())} but write the data to my Dropbox folder
+#' so I can sync between my work and home computers. Things like the Window Title can be
+#' changed in the config.R file as well, but don't waste time doing this.  
 #' 
 #' Clicking \code{Project 1}, \code{Project 2}, and \code{Wasted Time} starts the timer,
 #' and \code{Stop} stops the timer. \code{Report} gives a daily, weekly, monthly breakdown
-#' of work time. \code{Edit} allows you to edit the daily time recordings. The
-#' \code{DayData.csv} file in \code{data_path} allows you to edit the total day time. 
+#' of work time. \code{Edit} allows you to edit only the time recorded during the day and
+#' the Task (from a drop-down menu).  \code{DayData.csv} file in \code{data_path} allows
+#' you to edit the total time for a given day. 
 #'
 #' Requires \code{gWidgets2}, \code{gWidgets2RGtk2} and \code{dev_tools}. The package must
-#' be loaded with \code{load_all('path to the package folder')}.  The Ultimate
-#' Success Plan project is in the development phase, please report bugs to me by typing in
-#' the \code{R} console \code{packageDescription("successPlan")}.
+#' be loaded with \code{load_all('path to the package folder')}.  The Ultimate Success
+#' Plan project is in the development phase, please report bugs to me by typing in the
+#' \code{R} console \code{packageDescription("successPlan")}.
 #'
 #' @param verbose prints out configuration settings, default is \code{\link{FALSE}}
+#' 
+#' @param sanitize clears out unused labels from the Task dropdown menu in the \code{Edit}
+#' window, default is \code{\link{FALSE}}. This issue often merges when you waste time
+#' tinkering with button labels. 
 #'
 #' @return none
 #'
 #' @export
 
-successPlan <- function(verbose=FALSE) {
+successr <- function(verbose=FALSE, sanitize=FALSE) {
 
   try(dispose(SuccessWindow), silent=TRUE)
 
@@ -50,18 +55,18 @@ successPlan <- function(verbose=FALSE) {
   pkg_path <- dirname(getSrcDirectory(function(x) {x}))
   config_path <- file.path(pkg_path, "config.R") 
 
-  # If badness in config file, ignore
+  # Deal with  badness in config file
   tryCatch(source(config_path, local=TRUE), silent=TRUE)
-  if((!exists("Window_title", envir=environment()))) {
-    cat("All config values must be valid strings, 
-      using default settings...\n")
-    Window_title <- "The Ultimate SuccessPlan"
-    Button_label_1 <- "Project 1"
-    Button_label_2 <- "Project 2"
-    Button_label_3 <- "Wasted Time"
-  }
-  ggNames <- c(Button_label_1, Button_label_2, Button_label_3)
+  tryCatch(ggNames <- as.character(
+    c(Button_label_1, Button_label_2, Button_label_3)))
 
+  ErrorMsg <- "Button labels must be valid (non-empty) strings,
+    using default settings...\n"
+  if((!exists("ggNames", envir=environment()) || (any(nchar(ggNames)==0)))) {
+    cat(ErrorMsg)
+    ggNames = c("Project 1", "Project 2", "Wasted Time")
+  }
+  
   # Set data path
   if(!dir.exists(data_path))  {
       cat(dQuote(data_path), 
@@ -85,7 +90,6 @@ successPlan <- function(verbose=FALSE) {
     write.csv(DayData, file=file.path(day_file),
       row.names=FALSE)
   }
-
 
   # Shorthand names for GUI setup
   group_i <- paste0("G",1:3)
@@ -118,8 +122,6 @@ successPlan <- function(verbose=FALSE) {
         HourP=round((Hour/sum(Hour))*100, 1))
       dat 
   }
-  # debugonce(calcTime)
-  # dat=calcTime(spData)
 
   # Format time for GUI
   updateGuiTime <- function(dat) {
@@ -137,8 +139,6 @@ successPlan <- function(verbose=FALSE) {
       svalue(Label) <- getTime(dat, ggNames[i])
     } 
   }
-  # getTime(tt, "P1" )
-
 
   writeDay <- function(dat, day_file) {
     DayData <- read.csv(day_file,
@@ -168,8 +168,6 @@ successPlan <- function(verbose=FALSE) {
     write.csv(DayData, file=file.path(day_file), 
       row.names=FALSE)
   }
-  # debugonce(writeDay)
-  # yes <- writeDay(tt, DayData)
 
   calcWeek <- function(day_file) {
     dat <- read.csv(day_file,
@@ -185,8 +183,6 @@ successPlan <- function(verbose=FALSE) {
     dat <- transform(dat, Hour=sp_fmt(Hour))
     dat
   }
-  # debugonce(calcWeek)
-  # spDayData1 <- calcWeek(DayData)
 
   calcMonth <- function(dat) {
     dat <- transform(dat, Week=as.numeric(format(Date, "%U")))
@@ -207,8 +203,6 @@ successPlan <- function(verbose=FALSE) {
     dat <- transform(dat, Hour60=as.numeric(sub(":", ".", HourF)))
     dat
   }
-  # debugonce(calcMonth)
-  # tt <- calcMonth(DayData)
 
   doPlot <- function(day_file) {
     DayData <- read.csv(day_file,
@@ -229,9 +223,6 @@ successPlan <- function(verbose=FALSE) {
     dev.off()
     f
   }
-  # debugonce(doPlot)
-  # doPlot(day_file)
-
 
   doButton <- function(h, ...) {
     sapply(button_i, function(i) {
@@ -245,14 +236,15 @@ successPlan <- function(verbose=FALSE) {
     aLine <- data.frame(Time=Sys.time(), Task=h$action)
     spData <- rbind(spData, aLine)
     spData <- subset(spData, as.Date(Time)==today)
-    spData$Task <- factor(spData$Task,
-      levels=c(ggNames, "Stop"))
+    if (sanitize==TRUE) {
+      spData$Task <- factor(spData$Task,
+        levels=c(ggNames, "Stop"))
+    }
     save("spData", file=time_file)
     time_dat <- calcTime(spData)
     updateGuiTime(time_dat)
     writeDay(time_dat, day_file)
   }
-  # debugonce(doButton)
 
   gEditButton <- function(time_file) {
     Gedit <- gwindow("Data Editor") 
@@ -263,15 +255,14 @@ successPlan <- function(verbose=FALSE) {
     DF <- gdf(spData, cont=Gedit)
     addHandlerChanged(DF, handler = function(h ,...) {
       spData <- data.frame(DF[])
-      spData$Task <- factor(spData$Task,
-        levels=c(ggNames, "Stop"))
+      if (sanitize==TRUE) {
+        spData$Task <- factor(spData$Task,
+          levels=c(ggNames, "Stop"))
+      }
       time_dat <- calcTime(spData)
       updateGuiTime(time_dat)
       save("spData", file=time_file)})
   }
-  # debugonce(gEditButton)
-  # gEditButton(time_file)
-
 
   lastWkUpdate <- function(day_file) {
     sp_DF <- calcWeek(day_file)
@@ -349,10 +340,4 @@ successPlan <- function(verbose=FALSE) {
   svalue(notebook) <- 1
   visible(SuccessWindow) <- TRUE
 }
-
-###############################################################################################
-###############################################################################################
-###############################################################################################
-
-
 
