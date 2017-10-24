@@ -61,7 +61,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   config_path <- file.path(pkg_path, "config.R") 
 
   check_names <- function(config_path) {
-     source(config_path, local=TRUE)
+    source(config_path, local=TRUE)
     test_names <- unique(as.character(
       c(button_label_1, button_label_2, button_label_3)))
     if (length(test_names)!=3 | any(grepl('[^A-z0-9 ]|^$', test_names))) {
@@ -74,9 +74,11 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   
   check_path <- function(config_path) {
     source(config_path, local=TRUE)
-    if(!dir.exists(data_path) & nchar(data_path)>0) {
+    if (data_path=="") stop() 
+    if(!dir.exists(data_path)) {
       stop(paste( 'Warning:', data_path, 'directory does not exist,
-        using default setting...\n'))}
+        using default setting...\n'))
+    }
     data_path
   }
   tryCatch(data_path <- check_path(config_path),
@@ -115,11 +117,8 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
 
   #### Format Time 
   sp_fmt <- function(x) {
-    fhour <- x %/% 1
-    fmin <- round((x %% 1)*0.6, 2) 
-    fmin <- sub("(\\d+).(\\d+)", "\\2", format(fmin, nsmall=2))
-    out <- paste(fhour, fmin, sep=':')
-    out 
+    Min <- round((x %% 1)*60)
+    sprintf("%.1d:%.02d", x %/% 1, ifelse(Min==60, 59, Min))
   }
 
   # This is the main time calc function
