@@ -125,17 +125,21 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   # This is the main time calc function
   calcTime <- function(dat) {
       if(is.null(dat) || nrow(dat)==0) return(NULL)
-      Seconds <- as.numeric(dat$Time)
-      Hour <- round(diff(Seconds)/(60*60), 2)
-      dat <- transform(dat, Hour=c(Hour, NA),
+      dat <- transform(dat, Time2=c(Time[2:nrow(dat)],NA))
+      dat <- transform(dat, 
+        Hour=as.numeric(difftime(Time2,Time, units='hours')),
         Date=as.Date(Time))
-      # neg <- dat[which(dat$Hour<0 & dat$Task=="Stop"), "Time"]
-      dat <- subset(dat, !(Hour<0 | Task=="Stop"))
+      Drop <- which(dat$Hour < 0)
+      if (length(Drop)>0) {
+        message('Warning: you entered an illegal time, check: ')
+        print(dat[Drop+1, c("Time", "Task") ])
+      }
+      dat <- dat[which(dat$Hour>=0 & dat$Task!="Stop"), ]
       if(nrow(dat)==0 || (nrow(dat)==1 & is.na(dat$Hour))) {
         return(NULL)
       }
-      dat <- aggregate(Hour ~ Task + Date, dat, sum, 
-        na.action=na.omit)
+      dat <- aggregate(Hour ~ Task + Date, data=dat,
+        sum, na.action=na.omit)
       dat <- transform(dat, 
         HourP=round((Hour/sum(Hour))*100, 1))
       dat 
@@ -229,7 +233,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     f <- tempfile( )
     png(f, units="in",
          width=3.6, height=1.8, pointsize=8, res=100, type="cairo")
-    par(mar=c(2.7, 5.0, 0, 0.4))
+    par(mar=c(2.6, 4.4, 0.3, 1.2))
     maxHour <- max(out$Hour)
     with(out, barplot(Hour60, horiz=TRUE, 
       xlim=c(0, ifelse(maxHour<0.01, 1, maxHour)),
