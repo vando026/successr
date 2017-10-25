@@ -117,7 +117,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
 
   #### Format Time 
   sp_fmt <- function(x) {
-    Min <- round((x %% 1)*60)
+    Min <- round((x %% 1)*60, 2)
     sprintf("%.1d:%.02d", x %/% 1, ifelse(Min==60, 59, Min))
   }
 
