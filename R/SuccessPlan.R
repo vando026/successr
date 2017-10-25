@@ -147,13 +147,13 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   # Format time for GUI
   updateGuiTime <- function(dat) {
     getTime <- function(dat, task) {
-      if(is.null(dat) || any(dat$Task %in% task)==FALSE) {
+      try(list2env(
+        subset(dat, Task %in% task, c("Hour", "HourP")),
+        env=environment()), silent=TRUE)
+      if(is.null(dat) || length(Hour)==0 || Hour < 0.01) {
         Hour <- HourP <- 0 
-      } else {
-        Hour <- dat[dat$Task %in% task, "Hour"] 
-        HourP <- dat[dat$Task %in% task, "HourP"] 
-      }
-      paste0(sp_fmt(Hour),"Hrs (",HourP,"%)")
+      } 
+      sprintf("%sHrs (%s%%)", sp_fmt(Hour), HourP)
     }
     for(i in seq(3)) {
       Label <- get(label_i[i], envir=environment()) 
