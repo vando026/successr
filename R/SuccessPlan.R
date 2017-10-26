@@ -117,22 +117,27 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
 
   #### Format Time 
   sp_fmt <- function(x) {
-    Min <- round((x %% 1)*60, 2)
+    Min <- round((x %% 1)*60)
     sprintf("%.1d:%.02d", x %/% 1, ifelse(Min==60, 59, Min))
+  }
+
+  print_dat <- function(x) {
+    paste(capture.output(print(x)), collapse = "\n")
   }
 
   # This is the main time calc function
   calcTime <- function(dat) {
       if(is.null(dat) || nrow(dat)==0) return(NULL)
+      rownames(dat) <- NULL
+      back_time <- which(diff(dat$Time)<0)
+      if (length(back_time)>0) {
+        message('Warning: you entered an illegal time, check: \n',
+          print_dat(dat[back_time+1, c("Time", "Task") ]))
+      }
       dat <- transform(dat, Time2=c(Time[2:nrow(dat)],NA))
       dat <- transform(dat, 
         Hour=as.numeric(difftime(Time2,Time, units='hours')),
         Date=as.Date(Time))
-      Drop <- which(dat$Hour < 0)
-      if (length(Drop)>0) {
-        message('Warning: you entered an illegal time, check: ')
-        print(dat[Drop+1, c("Time", "Task") ])
-      }
       dat <- dat[which(dat$Hour>=0 & dat$Task!="Stop"), ]
       if(nrow(dat)==0 || (nrow(dat)==1 & is.na(dat$Hour))) {
         return(NULL)
@@ -262,7 +267,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
         levels=c(ggNames, "Stop"))
     }
     save("spData", file=time_file)
-    time_dat <- calcTime(spData)
+    time_dat <- calcTime(spData) 
     updateGuiTime(time_dat)
     writeDay(time_dat, day_file)
   }
@@ -280,7 +285,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
         spData$Task <- factor(spData$Task,
           levels=c(ggNames, "Stop"))
       }
-      time_dat <- calcTime(spData)
+      time_dat <- suppressMessages(calcTime(spData))
       updateGuiTime(time_dat)
       save("spData", file=time_file)})
   }
