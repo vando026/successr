@@ -121,19 +121,22 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     sprintf("%.1d:%.02d", x %/% 1, ifelse(Min==60, 59, Min))
   }
 
-  print_dat <- function(x) {
-    paste(capture.output(print(x)), collapse = "\n")
+  check_dat <- function(dat) {
+    print_dat <- function(x) {
+      paste(capture.output(print(x)), collapse = "\n")
+    }
+    rownames(dat) <- NULL
+    back_time <- which(diff(dat$Time)<0)
+    if (length(back_time)>0 | any(is.na(dat$Time))) {
+      message( 'Warning: you entered an illegal time, check: \n',
+        print_dat(dat[back_time+1, c("Time", "Task") ]))
+    }
   }
 
   # This is the main time calc function
   calcTime <- function(dat) {
       if(is.null(dat) || nrow(dat)==0) return(NULL)
-      rownames(dat) <- NULL
-      back_time <- which(diff(dat$Time)<0)
-      if (length(back_time)>0) {
-        message('Warning: you entered an illegal time, check: \n',
-          print_dat(dat[back_time+1, c("Time", "Task") ]))
-      }
+      check_dat(dat)
       dat <- transform(dat, Time2=c(Time[2:nrow(dat)],NA))
       dat <- transform(dat, 
         Hour=as.numeric(difftime(Time2,Time, units='hours')),
