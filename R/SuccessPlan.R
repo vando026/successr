@@ -121,22 +121,10 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     sprintf("%.1d:%.02d", x %/% 1, ifelse(Min==60, 59, Min))
   }
 
-  check_dat <- function(dat) {
-    print_dat <- function(x) {
-      paste(capture.output(print(x)), collapse = "\n")
-    }
-    rownames(dat) <- NULL
-    back_time <- which(diff(dat$Time)<0)
-    if (length(back_time)>0 | any(is.na(dat$Time))) {
-      message( 'Warning: you entered an illegal time, check: \n',
-        print_dat(dat[back_time+1, c("Time", "Task") ]))
-    }
-  }
 
   # This is the main time calc function
   calcTime <- function(dat) {
       if(is.null(dat) || nrow(dat)==0) return(NULL)
-      check_dat(dat)
       dat <- transform(dat, Time2=c(Time[2:nrow(dat)],NA))
       dat <- transform(dat, 
         Hour=as.numeric(difftime(Time2,Time, units='hours')),
@@ -269,10 +257,24 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
       spData$Task <- factor(spData$Task,
         levels=c(ggNames, "Stop"))
     }
+    rownames(spData) <- seq(nrow(spData))
     save("spData", file=time_file)
     time_dat <- calcTime(spData) 
     updateGuiTime(time_dat)
     writeDay(time_dat, day_file)
+  }
+
+  check_dat <- function(dat) {
+    print_dat <- function(x) {
+      paste(capture.output(print(x)), collapse = "\n")
+    }
+    dat <- data.frame(dat)
+    back_time <- which(diff(dat$Time)<0)
+    if (length(back_time)>0) {
+      stop('Warning: ignoring illegal time entry in: \n',
+        print_dat(dat[back_time+1, c("Time", "Task") ]),'\n')
+    }
+    dat
   }
 
   gEditButton <- function(time_file) {
@@ -280,15 +282,16 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     size(Gedit) <- list(width=80, 
       height=300, column.widths=c(70, 30))
     load(time_file)
-    rownames(spData) <- seq(nrow(spData))
     DF <- gdf(spData, cont=Gedit)
     addHandlerChanged(DF, handler = function(h ,...) {
-      spData <- data.frame(DF[])
+      spData <- spData
+      tryCatch(spData <- check_dat(DF[]),
+       error = function(e) message(e)) 
       if (sanitize==TRUE) {
         spData$Task <- factor(spData$Task,
           levels=c(ggNames, "Stop"))
       }
-      time_dat <- suppressMessages(calcTime(spData))
+      time_dat <- calcTime(spData) 
       updateGuiTime(time_dat)
       save("spData", file=time_file)})
   }
