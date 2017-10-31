@@ -46,7 +46,7 @@ the Task (from a drop-down menu).  \code{DayData.csv} file in \code{data_path} a
 you to edit the total time for a given day. 
 
 Requires \code{gWidgets2RGtk2} and \code{dev_tools}. The package must
-be loaded with \code{load_all('path to the package folder')}.  The Ultimate Success
+be loaded with \code{install_bitbucket('path to the package folder')}.  The Ultimate Success
 Plan project is in the development phase, please report bugs to me by typing in the
 \code{R} console \code{packageDescription("successPlan")}.
 }
