@@ -42,8 +42,6 @@ options(guiToolkit="RGtk2" )
 #'
 #' @return none
 #'
-#' @import gWidgets2RGtk2
-#'
 #' @export
 
 successr <- function(verbose=FALSE, sanitize=FALSE) {
