@@ -374,7 +374,3 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
 }
 
 
-
-# d1=c(paste0("g", 1:3))
-# d2=c(paste0("r", 1:3))
-# tryCatch(d1 <- check_config(d2), error = function(e) "yes")
