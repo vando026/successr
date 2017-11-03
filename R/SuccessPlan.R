@@ -1,4 +1,3 @@
-options(guiToolkit="RGtk2" )
 
 #' @title The Ultimate Success Plan
 #' 
@@ -41,11 +40,14 @@ options(guiToolkit="RGtk2" )
 #' tinkering with button labels. 
 #'
 #' @return none
-#'
+#' 
+#' @import config
+#' 
 #' @export
 
 successr <- function(verbose=FALSE, sanitize=FALSE) {
 
+  options(guiToolkit="RGtk2" )
   try(dispose(SuccessWindow), silent=TRUE)
 
   # These are the default settings
@@ -56,7 +58,9 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   window_title <- "The Ultimate Success Plan"
 
   # Get configuration settings
-  config_path <- file.path(pkg_path, "config.R") 
+  config_path <- file.path(pkg_path, "config.yml") 
+  if (!file.exists(config_path)
+    file.copy(file.path(pkg_path, 'R/config.yml'), config_path)
 
   check_names <- function(config_path) {
     source(config_path, local=TRUE)
@@ -119,18 +123,17 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     sprintf("%.1d:%.02d", x %/% 1, ifelse(Min==60, 59, Min))
   }
 
-
   # This is the main time calc function
   calcTime <- function(dat) {
-      if(is.null(dat) || nrow(dat)==0) return(NULL)
+      if(is.null(dat) || nrow(dat) %in% c(0,1)) 
+        return(NULL)
       dat <- transform(dat, Time2=c(Time[2:nrow(dat)],NA))
       dat <- transform(dat, 
         Hour=as.numeric(difftime(Time2,Time, units='hours')),
         Date=as.Date(Time))
       dat <- dat[which(dat$Hour>=0 & dat$Task!="Stop"), ]
-      if(nrow(dat)==0 || (nrow(dat)==1 & is.na(dat$Hour))) {
+      if(nrow(dat)==0 || (nrow(dat)==1 & is.na(dat$Hour)))  
         return(NULL)
-      }
       dat <- aggregate(Hour ~ Task + Date, data=dat,
         sum, na.action=na.omit)
       dat <- transform(dat, 
@@ -143,7 +146,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     getTime <- function(dat, task) {
       try(list2env(
         subset(dat, Task %in% task, c("Hour", "HourP")),
-        env=environment()), silent=TRUE)
+        envir=environment()), silent=TRUE)
       if(is.null(dat) || length(Hour)==0 || Hour < 0.01) {
         Hour <- HourP <- 0 
       } 

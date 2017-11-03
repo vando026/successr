@@ -1,12 +1,12 @@
 Package: successr
 Title: The Ultimate Success Plan
-Description: Track wasted time
+Description: Tool to track and diagnose wasted time.
 Version: 0.0.0.9001
-License: NA
+License: GPL-3
 Depends: R (>= 3.4.1), gWidgets2RGtk2 (>= 1.0-6)
 Author: Alain Vandormael <vando026@umn.edu>
 Maintainer: Alain Vandormael <vando026@umn.edu>
 Encoding: UTF-8
 RoxygenNote: 6.0.1
-
+Imports: config
 
