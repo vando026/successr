@@ -1,4 +1,3 @@
-
 #' @title The Ultimate Success Plan
 #' 
 #' @description  A diagnostic tool for quantifying time wastage.
@@ -53,49 +52,29 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   # These are the default settings
   pkg_path <- dirname(getSrcDirectory(function(x) {x}))
   data_path <- file.path(pkg_path, 'data')
-  if (!dir.exists(data_path)) dir.create(data_path)
-  ggNames  <- c("Project 1", "Project 2", "Wasted Time")
-  window_title <- "The Ultimate Success Plan"
 
   # Get configuration settings
   config_path <- file.path(pkg_path, "config.yml") 
-  if (!file.exists(config_path)
+  if (!file.exists(config_path))
     file.copy(file.path(pkg_path, 'R/config.yml'), config_path)
+  config <- config::get(file=config_path)
 
-  check_names <- function(config_path) {
-    source(config_path, local=TRUE)
-    test_names <- unique(as.character(
-      c(button_label_1, button_label_2, button_label_3)))
-    if (length(test_names)!=3 | any(grepl('[^A-z0-9 ]|^$', test_names))) {
-      stop("Warning: Button labels must be valid (non-empty) strings,
-        using default settings...\n")}
-    test_names
-  }
-  tryCatch(ggNames <- check_names(config_path), 
-    error = function(e)  message(e))
+  button_labels <- config[grep("^button", names(config))]
+  if (any(grepl('[^A-z0-9 ]|^$', button_labels)))
+    stop("Button labels must be valid (non-empty) strings\n")
+  ggNames <- unlist(button_labels)
   
-  check_path <- function(config_path) {
-    source(config_path, local=TRUE)
-    if (data_path=="") stop() 
-    if(!dir.exists(data_path)) {
-      stop(paste( 'Warning:', data_path, 'directory does not exist,
+  check_path <- function(config) {
+    if (config$data_path=="") stop() 
+    if(!dir.exists(config$data_path)) {
+      stop(paste('Warning:', config$data_path, 'directory does not exist,
         using default setting...\n'))
     }
-    data_path
+    config$data_path
   }
-  tryCatch(data_path <- check_path(config_path),
+  tryCatch(data_path <- check_path(config),
     error = function(e) message(e))
-
-  check_win_title <- function(config_path) {
-    source(config_path, local=TRUE)
-    if (any(grepl('[^A-z0-9 ]', window_title))) {
-        stop('Warning: Window title must be a valid string,
-        using default setting.\n') }
-    window_title
-  }
-  tryCatch(window_title <- check_win_title(config_path),
-    error = function(e) message(e))
-
+  
   time_file <- file.path(data_path, "TimeSheet.Rdata")
   day_file <- file.path(data_path, "DayData.csv")
   today <- as.Date(Sys.time())
@@ -307,7 +286,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   ###############################################################################################
   ######################################## LAYOUT ###############################################
   ###############################################################################################
-  SuccessWindow <<- gwindow(window_title, 
+  SuccessWindow <<- gwindow(config$window_title, 
     width=620, height=240, visible=FALSE)
 
   # This makes the tabs
@@ -364,12 +343,11 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   img <- doPlot(day_file) 
   img_out <- gimage(basename(img),dirname(img), cont = out0)
 
-  if(verbose==TRUE) {
-    cat('Your configuraion settings: \n')
-    print(read.table(config_path, 
-      col.names=c("Variable", "and", "Value")))
+  if (verbose==TRUE) {
+    message('Your configuration settings are:')
+    print(config)
   }
-
+  
   svalue(notebook) <- 1
   visible(SuccessWindow) <- TRUE
 }
