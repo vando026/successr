@@ -42,6 +42,9 @@
 #' 
 #' @import config
 #' 
+#' @importFrom gWidgets2 gbutton gaction gnotebook gimage svalue gtable addSpace gwindow
+#' size
+#' 
 #' @export
 
 successr <- function(verbose=FALSE, sanitize=FALSE) {
@@ -49,9 +52,9 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   options(guiToolkit="RGtk2" )
   try(dispose(SuccessWindow), silent=TRUE)
 
-  # These are the default settings
   pkg_path <- dirname(getSrcDirectory(function(x) {x}))
   data_path <- file.path(pkg_path, 'data')
+  if (!dir.exists(data_path)) dir.create(data_path)
 
   # Get configuration settings
   config_path <- file.path(pkg_path, "config.yml") 
@@ -283,9 +286,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     svalue(notebook) <- 2
   }
 
-  ###############################################################################################
-  ######################################## LAYOUT ###############################################
-  ###############################################################################################
+  ## LAYOUT 
   SuccessWindow <<- gwindow(config$window_title, 
     width=620, height=240, visible=FALSE)
 
@@ -338,7 +339,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     column.widths=c(90, 70, 50, 40))
   addSpace(sp_out, 1)
 
-  # Plots
+  # Plot
   sp_gr <- ggroup(cont=out0, horizontal=TRUE, spacing=0)
   img <- doPlot(day_file) 
   img_out <- gimage(basename(img),dirname(img), cont = out0)
