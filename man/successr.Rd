@@ -32,12 +32,12 @@ lunch breaks, unannounced visits by the boss, any meeting, internet surfing, chi
 with colleagues, or courtesy calls by telemarketers, friends/family, and partner(s).
 
 Labels for \code{Project 1}, \code{Project 2}, and \code{Wasted Time} can only be
-changed in the config.R file. But just use the default settings rather than waste time
-tinkering with button labels.  There is an option to set a personal \code{data_path} to
-where you want your data stored. In my set-up, I put this package in my \code{R}
-library folder (see \code{print(.libPaths())} but write the data to my Dropbox folder
-so I can sync between my work and home computers. Things like the Window Title can be
-changed in the config.R file as well, but don't waste time doing this.  
+changed in the config.yml file. But just use the default settings rather than waste
+time tinkering with button labels.  There is an option to set a personal
+\code{data_path} to where you want your data stored. In my set-up, I put this package
+in my \code{R} library folder (see \code{print(.libPaths())} but write the data to my
+Dropbox folder so I can sync between my work and home computers. Things like the Window
+Title can be changed in the config.yml file as well, but don't waste time doing this.  
 
 Clicking \code{Project 1}, \code{Project 2}, and \code{Wasted Time} starts the timer,
 and \code{Stop} stops the timer. \code{Report} gives a daily, weekly, monthly breakdown
@@ -45,8 +45,9 @@ of work time. \code{Edit} allows you to edit only the time recorded during the d
 the Task (from a drop-down menu).  \code{DayData.csv} file in \code{data_path} allows
 you to edit the total time for a given day. 
 
-Requires \code{gWidgets2RGtk2} and \code{dev_tools}. The package must
-be loaded with \code{install_bitbucket('path to the package folder')}.  The Ultimate Success
-Plan project is in the development phase, please report bugs to me by typing in the
-\code{R} console \code{packageDescription("successPlan")}.
+Requires \code{GTK} libraries to work, which you may or may not have to manually
+install yourself. The package must be loaded with \code{install_bitbucket('path to the
+package folder')}.  The Ultimate Success Plan project is in the development phase,
+please report bugs to me by typing in the \code{R} console
+\code{packageDescription("successPlan")}.
 }

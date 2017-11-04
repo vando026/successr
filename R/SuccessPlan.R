@@ -14,12 +14,12 @@
 #' with colleagues, or courtesy calls by telemarketers, friends/family, and partner(s).
 #' 
 #' Labels for \code{Project 1}, \code{Project 2}, and \code{Wasted Time} can only be
-#' changed in the config.R file. But just use the default settings rather than waste time
-#' tinkering with button labels.  There is an option to set a personal \code{data_path} to
-#' where you want your data stored. In my set-up, I put this package in my \code{R}
-#' library folder (see \code{print(.libPaths())} but write the data to my Dropbox folder
-#' so I can sync between my work and home computers. Things like the Window Title can be
-#' changed in the config.R file as well, but don't waste time doing this.  
+#' changed in the config.yml file. But just use the default settings rather than waste
+#' time tinkering with button labels.  There is an option to set a personal
+#' \code{data_path} to where you want your data stored. In my set-up, I put this package
+#' in my \code{R} library folder (see \code{print(.libPaths())} but write the data to my
+#' Dropbox folder so I can sync between my work and home computers. Things like the Window
+#' Title can be changed in the config.yml file as well, but don't waste time doing this.  
 #' 
 #' Clicking \code{Project 1}, \code{Project 2}, and \code{Wasted Time} starts the timer,
 #' and \code{Stop} stops the timer. \code{Report} gives a daily, weekly, monthly breakdown
@@ -27,10 +27,11 @@
 #' the Task (from a drop-down menu).  \code{DayData.csv} file in \code{data_path} allows
 #' you to edit the total time for a given day. 
 #'
-#' Requires \code{gWidgets2RGtk2} and \code{dev_tools}. The package must
-#' be loaded with \code{install_bitbucket('path to the package folder')}.  The Ultimate Success
-#' Plan project is in the development phase, please report bugs to me by typing in the
-#' \code{R} console \code{packageDescription("successPlan")}.
+#' Requires \code{GTK} libraries to work, which you may or may not have to manually
+#' install yourself. The package must be loaded with \code{install_bitbucket('path to the
+#' package folder')}.  The Ultimate Success Plan project is in the development phase,
+#' please report bugs to me by typing in the \code{R} console
+#' \code{packageDescription("successPlan")}.
 #'
 #' @param verbose prints out configuration settings, default is \code{\link{FALSE}}
 #' 
@@ -40,10 +41,10 @@
 #'
 #' @return none
 #' 
-#' @import config
+#' @import config 
 #' 
 #' @importFrom gWidgets2 gbutton gaction gnotebook gimage svalue gtable addSpace gwindow
-#' size
+#' size ggroup
 #' 
 #' @export
 
@@ -135,7 +136,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
       sprintf("%sHrs (%s%%)", sp_fmt(Hour), HourP)
     }
     for(i in seq(3)) {
-      Label <- get(label_i[i], envir=environment()) 
+      Label <- base::get(label_i[i], envir=environment()) 
       svalue(Label) <- getTime(dat, ggNames[i])
     } 
   }
@@ -195,7 +196,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
       lastMnth <- max(dat$Week)
       dat4 <- data.frame(Week =c((lastMnth-3):lastMnth))
     }
-    dat <- merge(dat4, dat, by="Week", all.x=TRUE)
+    dat <- base::merge(dat4, dat, by="Week", all.x=TRUE)
     dat <- transform(dat, 
       Hour=ifelse(!is.na(Hour), Hour, 0.00),
       HourF=ifelse(!is.na(Hour), sp_fmt(Hour), "0:00"),
@@ -226,7 +227,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
 
   doButton <- function(h, ...) {
     sapply(button_i, function(i) {
-      ii <- get(i, envir=environment())
+      ii <- base::get(i, envir=environment())
       font(ii) <- list(weight="normal", size=10, color="black")})
     if(h$action!="Stop")  
       font(h$obj) <- list(weight="bold", size=12, color="red")
@@ -306,7 +307,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   # Now do settings for three main buttons 
   for(i in seq(3)) {
     assign(group_i[i], do.call("ggroup", ggList))
-    gi <- get(group_i[i], envir=environment())
+    gi <- base::get(group_i[i], envir=environment())
     addSpace(gi, 5)
     assign(button_i[i], gbutton(ggNames[i], 
       cont=gi, expand=TRUE, fill="y",
