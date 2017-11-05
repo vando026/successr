@@ -47,11 +47,10 @@
 #' 
 #' @export
 
-successr <- function(verbose=FALSE, sanitize=FALSE, ...) {
+successr <- function(verbose=FALSE, sanitize=FALSE) {
 
   options(guiToolkit="RGtk2" )
-
-  pkg_path <- dirname(getSrcDirectory(function(x) {x}))
+  pkg_path <- system.file(package='successr')
   data_path <- file.path(pkg_path, 'data')
   if (!dir.exists(data_path)) dir.create(data_path)
 
