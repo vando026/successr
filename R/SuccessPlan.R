@@ -28,10 +28,9 @@
 #' you to edit the total time for a given day. 
 #'
 #' Requires \code{GTK} libraries to work, which you may or may not have to manually
-#' install yourself. The package must be loaded with \code{install_bitbucket('path to the
-#' package folder')}.  The Ultimate Success Plan project is in the development phase,
+#' install yourself. The Ultimate Success Plan project is in the development phase,
 #' please report bugs to me by typing in the \code{R} console
-#' \code{packageDescription("successPlan")}.
+#' \code{packageDescription("successr")}.
 #'
 #' @param verbose prints out configuration settings, default is \code{\link{FALSE}}
 #' 
