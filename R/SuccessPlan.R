@@ -52,7 +52,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   options(guiToolkit="RGtk2" )
   try(dispose(SuccessWindow), silent=TRUE)
 
-  pkg_path <- file.path(.libPaths[1], 'successr')
+  pkg_path <- file.path(.libPaths()[1], 'successr')
   data_path <- file.path(pkg_path, 'data')
   if (!dir.exists(data_path)) dir.create(data_path)
 
