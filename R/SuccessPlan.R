@@ -53,6 +53,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   try(dispose(SuccessWindow), silent=TRUE)
 
   pkg_path <- dirname(getSrcDirectory(function(x) {x}))
+  print(getwd())
   data_path <- file.path(pkg_path, 'data')
   if (!dir.exists(data_path)) dir.create(data_path)
 
