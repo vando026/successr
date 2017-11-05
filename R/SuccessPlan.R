@@ -47,19 +47,16 @@
 #' 
 #' @export
 
-successr <- function(verbose=FALSE, sanitize=FALSE) {
+successr <- function(verbose=FALSE, sanitize=FALSE, ...) {
 
   options(guiToolkit="RGtk2" )
-  try(dispose(SuccessWindow), silent=TRUE)
 
-  pkg_path <- file.path(.libPaths()[1], 'successr')
+  pkg_path <- system.file(package='successr')
+  # pkg_path <- dirname(getSrcDirectory(function(x) {x}))
   data_path <- file.path(pkg_path, 'data')
-  if (!dir.exists(data_path)) dir.create(data_path)
 
   # Get configuration settings
   config_path <- file.path(pkg_path, "config.yml") 
-  if (!file.exists(config_path))
-    file.copy(file.path(pkg_path, 'R/config.yml'), config_path)
   config <- config::get(file=config_path)
 
   button_labels <- config[grep("^button", names(config))]
@@ -287,6 +284,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
 
   ## LAYOUT 
+  try(dispose(SuccessWindow), silent=TRUE)
   SuccessWindow <<- gwindow(config$window_title, 
     width=620, height=240, visible=FALSE)
 
