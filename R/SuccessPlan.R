@@ -47,33 +47,28 @@
 #' 
 #' @export
 
-successr <- function(verbose=FALSE, sanitize=FALSE) {
+successr <- function(
+  data_path="~/Dropbox/R/successData",
+  verbose=FALSE, sanitize=FALSE) {
 
   options(guiToolkit="RGtk2" )
-  pkg_path <- system.file(package='successr')
-  # pkg_path <- dirname(getSrcDirectory(function(x) {x}))
-  data_path <- file.path(pkg_path, 'data')
+  # pkg_path <- system.file(package='successr')
+  pkg_path <- dirname(getSrcDirectory(function(x) {x}))
+
   if (!dir.exists(data_path)) dir.create(data_path)
+  if (!file.exists(file.path(data_path, "config.yml"))) {
+    file.copy(file.path(pkg_path, "data", "config.yml"),
+      data_path) 
+  }
 
   # Get configuration settings
-  config_path <- file.path(pkg_path, "config.yml") 
+  config_path <- file.path(data_path, "config.yml") 
   config <- config::get(file=config_path)
 
   button_labels <- config[grep("^button", names(config))]
   if (any(grepl('[^A-z0-9 ]|^$', button_labels)))
     stop("Button labels must be valid (non-empty) strings\n")
   ggNames <- unlist(button_labels)
-  
-  check_path <- function(config) {
-    if (config$data_path=="") stop() 
-    if(!dir.exists(config$data_path)) {
-      stop(paste('Warning:', config$data_path, 'directory does not exist,
-        using default setting...\n'))
-    }
-    config$data_path
-  }
-  tryCatch(data_path <- check_path(config),
-    error = function(e) message(e))
   
   time_file <- file.path(data_path, "TimeSheet.Rdata")
   day_file <- file.path(data_path, "DayData.csv")
