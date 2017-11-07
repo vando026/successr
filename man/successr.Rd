@@ -7,14 +7,10 @@
 successr(verbose = FALSE, sanitize = FALSE)
 }
 \arguments{
-\item{verbose}{prints out configuration settings, default is \code{\link{FALSE}}}
+\item{verbose}{prints out configuration settings.}
 
 \item{sanitize}{clears out unused labels from the Task dropdown menu in the \code{Edit}
-window, default is \code{\link{FALSE}}. This issue often merges when you waste time
-tinkering with button labels.}
-}
-\value{
-none
+window. This issue often merges when you waste time tinkering with button labels.}
 }
 \description{
 A diagnostic tool for quantifying time wastage.
@@ -24,30 +20,31 @@ You cannot be successful if you waste time. The Ultimate Success Plan is a
 tool for diagnosing the amount of time you waste during the day. Its aim is to finally
 convince you that you don't really work 8 hours a day.  At a metaphysical level, time
 can be divided into two categories: work time and wasted time. Work time is effectively
-used when you focus on one or two projects in the day. \code{Project 1} and/or
-\code{Project 2} are whatever projects you think are relevant.  \code{Wasted Time}
-includes anything that does not fall in \code{Project 1} and/or \code{Project 2}.
-Culprits for \code{Wasted Time} are typically toilet/cigarette/watercooler excursions,
-lunch breaks, unannounced visits by the boss, any meeting, internet surfing, chit chat
-with colleagues, or courtesy calls by telemarketers, friends/family, and partner(s).
-
-Labels for \code{Project 1}, \code{Project 2}, and \code{Wasted Time} can only be
-changed in the config.yml file. But just use the default settings rather than waste
-time tinkering with button labels.  There is an option to set a personal
-\code{data_path} to where you want your data stored. In my set-up, I put this package
-in my \code{R} library folder (see \code{print(.libPaths())} but write the data to my
-Dropbox folder so I can sync between my work and home computers. Things like the Window
-Title can be changed in the config.yml file as well, but don't waste time doing this.  
+used when you focus on at most two projects during the day that you think are relevant.
+\code{Wasted Time} includes anything that does not fall in \code{Project 1} and/or
+\code{Project 2}.  Culprits for \code{Wasted Time} are typically
+toilet/cigarette/watercooler excursions, lunch breaks, unannounced visits by the boss,
+any meeting, internet surfing, chit chat with colleagues, or courtesy calls by
+telemarketers, friends/family, and partner(s).
 
 Clicking \code{Project 1}, \code{Project 2}, and \code{Wasted Time} starts the timer,
 and \code{Stop} stops the timer. \code{Report} gives a daily, weekly, monthly breakdown
 of work time. \code{Edit} allows you to edit only the time recorded during the day and
-the Task (from a drop-down menu).  \code{DayData.csv} file in \code{data_path} allows
-you to edit the total time for a given day. 
+the Task (from a drop-down menu).  \code{DayData.csv} allows you to edit the total time
+for a given day (see below). 
 
-Requires \code{GTK} libraries to work, which you may or may not have to manually
-install yourself. The package must be loaded with \code{install_bitbucket('path to the
-package folder')}.  The Ultimate Success Plan project is in the development phase,
-please report bugs to me by typing in the \code{R} console
-\code{packageDescription("successPlan")}.
+Upon installation, successr will setup a data folder (where the data is stored) with a
+configuration file, called \code{config.yml} (see \code{\link{config}}). The folder can
+be found in \code{Sys.getenv("HOME")}. If you want to specify an alternative folder
+path, then you must put in your .Rprofile (see \code{\link{Startup}}) the following
+line: \code{Sys.setenv(R_SUCCESS="my/folder/path")}. In my Rprofile set-up, I have
+\code{Sys.setenv("~/Dropbox/vando026/successr")} so I can sync between my work and home
+computers. Labels for \code{Project 1}, \code{Project 2}, \code{Wasted Time} and
+the \code{Window Title} can only be changed in the \code{config.yml} file. But don't
+waste time doing this, just use the default settings.  
+
+Requires \code{GTK} libraries to work that you may or may not have to manually install
+yourself (which will waste some time). The Ultimate Success Plan project is in the
+development phase, please report bugs to me by typing in the \code{R} console
+\code{packageDescription("successr")}.
 }
