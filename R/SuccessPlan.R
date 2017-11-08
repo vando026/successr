@@ -122,7 +122,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   updateGuiTime <- function(dat) {
     getTime <- function(dat, task) {
       try(list2env(
-        subset(dat, Task %in% task, c("Hour", "HourP")),
+        dat[which(dat$Task %in% task), c("Hour", "HourP")],
         envir=environment()), silent=TRUE)
       if(is.null(dat) || length(Hour)==0 || Hour < 0.01) {
         Hour <- HourP <- 0 
@@ -227,7 +227,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     load(time_file, envir=environment())
     aLine <- data.frame(Time=Sys.time(), Task=h$action)
     spData <- rbind(spData, aLine)
-    spData <- subset(spData, as.Date(Time)==today)
+    spData <- spData[which(as.Date(spData$Time)==today), ]
     if (sanitize==TRUE) {
       spData$Task <- factor(spData$Task,
         levels=c(ggNames, "Stop"))
