@@ -40,9 +40,13 @@
 #' window. This issue often merges when you waste time tinkering with button labels. 
 #'
 #' @import config 
-#' 
 #' @importFrom gWidgets2 gbutton gaction gnotebook gimage svalue gtable addSpace gwindow
-#' size ggroup
+#' size<- ggroup dispose size gseparator glabel svalue<- visible<- font<-
+#' addHandlerChanged gdf
+#' @importFrom grDevices dev.off png
+#' @importFrom graphics par
+#' @importFrom stats aggregate na.omit
+#' @importFrom utils capture.output read.csv write.csv
 #' 
 #' @export
 
@@ -102,17 +106,15 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   calcTime <- function(dat) {
       if(is.null(dat) || nrow(dat) %in% c(0,1)) 
         return(NULL)
-      dat <- transform(dat, Time2=c(Time[2:nrow(dat)],NA))
-      dat <- transform(dat, 
-        Hour=as.numeric(difftime(Time2,Time, units='hours')),
-        Date=as.Date(Time))
+      dat$Time2 <- c(dat$Time[2:nrow(dat)],NA)
+      dat$Hour <- as.numeric(difftime(dat$Time2,dat$Time, units='hours'))
+      dat$Date <- as.Date(dat$Time)
       dat <- dat[which(dat$Hour>=0 & dat$Task!="Stop"), ]
       if(nrow(dat)==0 || (nrow(dat)==1 & is.na(dat$Hour)))  
         return(NULL)
       dat <- aggregate(Hour ~ Task + Date, data=dat,
         sum, na.action=na.omit)
-      dat <- transform(dat, 
-        HourP=round((Hour/sum(Hour))*100, 1))
+      dat$HourP <- round((dat$Hour/sum(dat$Hour))*100, 1)
       dat 
   }
 
@@ -138,7 +140,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
       colClasses=c("Date", "numeric"))
     isToday <- any(today %in% DayData$Date) 
     if(!is.null(dat)) { 
-      dat <- subset(dat, Task!=ggNames[3])
+      dat <- dat[!(dat$Task %in% ggNames[3]), ]
       if(nrow(dat)==0) {
         Hour <- 0 
       } else {
@@ -165,21 +167,19 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   calcWeek <- function(day_file) {
     dat <- read.csv(day_file,
       colClasses=c("Date", "numeric"))
-    dat <- subset(dat, Date > (today-7))
-    if(is.null(dat) || nrow(dat)==0) {
+    dat <- dat[which(dat$Date > (today-7)), ]
+    if(is.null(dat) || nrow(dat)==0) 
       dat <- data.frame(Date=today, Hour=0.00) 
-    }
-    dat <- transform(dat, Day = format(Date, "%a"))
-    dat <- transform(dat, Week=paste0("Week",
-      as.numeric(format(Date, "%U"))))
+    dat$Day <- format(dat$Date, "%a")
+    dat$Week <- paste0("Week",as.numeric(format(dat$Date, "%U")))
     dat <- dat[, c("Date", "Week", "Day", "Hour")] 
-    dat <- transform(dat, Hour=sp_fmt(Hour))
+    dat$Hour <- sp_fmt(dat$Hour)
     dat
   }
 
   calcMonth <- function(dat) {
-    dat <- transform(dat, Week=as.numeric(format(Date, "%U")))
-    dat <- subset(dat, Date > (today-28))
+    dat$Week <- as.numeric(format(dat$Date, "%U"))
+    dat <- dat[which(dat$Date > (today-28)), ]
     dat <- aggregate(Hour ~ Week, data=dat, sum)
     if(nrow(dat)<4) {
       firstMnth <- min(dat$Week)
@@ -189,11 +189,10 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
       dat4 <- data.frame(Week =c((lastMnth-3):lastMnth))
     }
     dat <- base::merge(dat4, dat, by="Week", all.x=TRUE)
-    dat <- transform(dat, 
-      Hour=ifelse(!is.na(Hour), Hour, 0.00),
-      HourF=ifelse(!is.na(Hour), sp_fmt(Hour), "0:00"),
-      Week=paste0("Week", Week))
-    dat <- transform(dat, Hour60=as.numeric(sub(":", ".", HourF)))
+    dat$Hour <- ifelse(!is.na(dat$Hour), dat$Hour, 0.00)
+    dat$HourF <- ifelse(!is.na(dat$Hour), sp_fmt(dat$Hour), "0:00")
+    dat$Week <- paste0("Week", dat$Week)
+    dat$Hour60 <- as.numeric(sub(":", ".", dat$HourF))
     dat
   }
 
@@ -258,7 +257,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     size(Gedit) <- list(width=80, 
       height=300, column.widths=c(70, 30))
     load(time_file)
-    DF <- gdf(spData, cont=Gedit)
+    DF <- gdf(spData, container=Gedit)
     addHandlerChanged(DF, handler = function(h ,...) {
       spData <- spData
       tryCatch(spData <- check_dat(DF[]),
@@ -285,17 +284,17 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     width=620, height=240, visible=FALSE)
 
   # This makes the tabs
-  notebook <- gnotebook (cont = SuccessWindow )
+  notebook <- gnotebook (container = SuccessWindow )
   sp_g0 <- ggroup(label='Main', horizontal=TRUE, 
-    spacing=10, cont=notebook)
+    spacing=10, container=notebook)
 
-  sp_f0 <- ggroup(horizontal=FALSE, spacing=0, cont=sp_g0)
+  sp_f0 <- ggroup(horizontal=FALSE, spacing=0, container=sp_g0)
   sp_f1 <- ggroup(horizontal=TRUE, expand=TRUE, fill='x', 
-    spacing=10, cont=sp_g0)
+    spacing=10, container=sp_g0)
 
   # Set the paramaters of the ggGroups
   ggList <- list(horizontal = FALSE, spacing=5, 
-    expand=TRUE, fill='x', cont = sp_f1)
+    expand=TRUE, fill='x', container = sp_f1)
 
   # Now do settings for three main buttons 
   for(i in seq(3)) {
@@ -303,40 +302,40 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     gi <- base::get(group_i[i], envir=environment())
     addSpace(gi, 5)
     assign(button_i[i], gbutton(ggNames[i], 
-      cont=gi, expand=TRUE, fill="y",
+      container=gi, expand=TRUE, fill="y",
       handler=doButton, action=ggNames[i]))
     size(gi) <- c(70, 100)
-    sep <- gseparator(cont=gi)
-    assign(label_i[i], glabel("", cont=gi))
+    sep <- gseparator(container=gi)
+    assign(label_i[i], glabel("", container=gi))
     addSpace(gi, 2)
   }
 
-  sp_f2 <- ggroup(horizontal=FALSE, spacing=8, cont=sp_g0)
+  sp_f2 <- ggroup(horizontal=FALSE, spacing=8, container=sp_g0)
   addSpace(sp_f2, 3)
-  ST <- gbutton("Stop", cont=sp_f2, expand=TRUE, fill='y',
+  ST <- gbutton("Stop", container=sp_f2, expand=TRUE, fill='y',
     handler=doButton, action="Stop")
   r_act <- gaction("Report", icon="overview", 
     handler=function(...) lastWkUpdate(day_file))
-  rweek <- gbutton(action=r_act, cont=sp_f2, expand=TRUE, fill='y')
+  rweek <- gbutton(action=r_act, container=sp_f2, expand=TRUE, fill='y')
   e_act <- gaction("Edit", icon="editor", 
     handler=function(...) gEditButton(time_file))
-  Edit <- gbutton(action=e_act, cont=sp_f2, expand=TRUE, fill='y')
+  Edit <- gbutton(action=e_act, container=sp_f2, expand=TRUE, fill='y')
   addSpace(sp_f2, 0.0)
-  f3 <- ggroup(horizontal=FALSE, spacing=10, cont=sp_g0)
+  f3 <- ggroup(horizontal=FALSE, spacing=10, container=sp_g0)
 
   sp_out <- ggroup(label='Last Week', horizontal=TRUE, 
-    spacing=10, cont=notebook)
-  out0 <- ggroup(horizontal=TRUE, cont=sp_out)
+    spacing=10, container=notebook)
+  out0 <- ggroup(horizontal=TRUE, container=sp_out)
   sp_DF <- calcWeek(day_file)
-  sp_o1 <- gtable(sp_DF, cont = out0, expand=FALSE)
+  sp_o1 <- gtable(sp_DF, container = out0, expand=FALSE)
   size(sp_o1) <- list(width=250, height=220, 
     column.widths=c(90, 70, 50, 40))
   addSpace(sp_out, 1)
 
   # Plot
-  sp_gr <- ggroup(cont=out0, horizontal=TRUE, spacing=0)
+  sp_gr <- ggroup(container=out0, horizontal=TRUE, spacing=0)
   img <- doPlot(day_file) 
-  img_out <- gimage(basename(img),dirname(img), cont = out0)
+  img_out <- gimage(basename(img),dirname(img), container = out0)
 
   if (verbose==TRUE) {
     message('Your configuration settings are:')

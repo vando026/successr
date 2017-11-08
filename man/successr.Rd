@@ -40,7 +40,7 @@ path, then you must put in your .Rprofile (see \code{\link{Startup}}) the follow
 line: \code{Sys.setenv(R_SUCCESS="my/folder/path")}. In my Rprofile set-up, I have
 \code{Sys.setenv("~/Dropbox/vando026/successr")} so I can sync between my work and home
 computers. Labels for \code{Project 1}, \code{Project 2}, \code{Wasted Time} and
-the \code{Window Title} can only be changed in the \code{config.yml} file. But don't
+the \code{Window Title} can be changed in the \code{config.yml} file. But don't
 waste time doing this, just use the default settings.  
 
 Requires \code{GTK} libraries to work that you may or may not have to manually install
