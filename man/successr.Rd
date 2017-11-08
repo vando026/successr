@@ -43,7 +43,7 @@ computers. Labels for \code{Project 1}, \code{Project 2}, \code{Wasted Time} and
 the \code{Window Title} can be changed in the \code{config.yml} file. But don't
 waste time doing this, just use the default settings.  
 
-Requires \code{GTK} libraries to work that you may or may not have to manually install
+Requires \code{GTK} libraries to work that you may (or may not) have to manually install
 yourself (which will waste some time). The Ultimate Success Plan project is in the
 development phase, please report bugs to me by typing in the \code{R} console
 \code{packageDescription("successr")}.
