@@ -1,4 +1,6 @@
 
+  today <- as.Date(Sys.time())
+
   #### Format Time 
   sp_fmt <- function(x) {
     Min <- round((x %% 1)*60)
