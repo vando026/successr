@@ -77,7 +77,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   
   time_file <- file.path(data_path, "TimeSheet.Rdata")
   day_file <- file.path(data_path, "DayData.csv")
-  today <- as.Date(Sys.time())
+  today <- function() as.Date(Sys.time())
 
   # Create files if they do not exist
   if(!file.exists(time_file)) {
@@ -86,7 +86,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     save("spData", file=time_file)
   }
   if(!file.exists(day_file)) {
-    DayData <- data.frame(Date=today, Hour=0)
+    DayData <- data.frame(Date=today(), Hour=0)
     write.csv(DayData, file=file.path(day_file),
       row.names=FALSE)
   }
@@ -121,9 +121,9 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   calcWeek <- function(day_file) {
     dat <- read.csv(day_file,
       colClasses=c("Date", "numeric"))
-    dat <- dat[which(dat$Date > (today-7)), ]
+    dat <- dat[which(dat$Date > (today()-7)), ]
     if(is.null(dat) || nrow(dat)==0) 
-      dat <- data.frame(Date=today, Hour=0.00) 
+      dat <- data.frame(Date=today(), Hour=0.00) 
     dat$Day <- format(dat$Date, "%a")
     dat$Week <- paste0("Week",as.numeric(format(dat$Date, "%U")))
     dat <- dat[, c("Date", "Week", "Day", "Hour")] 
@@ -133,7 +133,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
 
   calcMonth <- function(dat) {
     dat$Week <- as.numeric(format(dat$Date, "%U"))
-    dat <- dat[which(dat$Date > (today-28)), ]
+    dat <- dat[which(dat$Date > (today()-28)), ]
     dat <- aggregate(Hour ~ Week, data=dat, sum)
     if(nrow(dat)<4) {
       firstMnth <- min(dat$Week)
@@ -201,7 +201,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     load(time_file, envir=environment())
     aLine <- data.frame(Time=Sys.time(), Task=h$action)
     spData <- rbind(spData, aLine)
-    spData <- spData[which(as.Date(spData$Time)==today), ]
+    spData <- spData[which(as.Date(spData$Time)==today()), ]
     if (sanitize==TRUE) {
       spData$Task <- factor(spData$Task,
         levels=c(ggNames, "Stop"))
@@ -253,7 +253,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   writeDay <- function(dat, day_file) {
     DayData <- read.csv(day_file,
       colClasses=c("Date", "numeric"))
-    isToday <- any(today %in% DayData$Date) 
+    isToday <- any(today() %in% DayData$Date) 
     if(!is.null(dat)) { 
       dat <- dat[!(dat$Task %in% ggNames[3]), ]
       if(nrow(dat)==0) {
@@ -262,16 +262,16 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
         Hour <- aggregate(Hour ~ Date, dat, sum)$Hour
       }
       if (isToday==TRUE) {
-        DayData$Hour[DayData$Date==today] <- Hour
+        DayData$Hour[DayData$Date==today()] <- Hour
       } else {
-        newLine <- data.frame(Date=today, Hour=Hour)
+        newLine <- data.frame(Date=today(), Hour=Hour)
         DayData <-  rbind(DayData, newLine) 
       }
     } else if(is.null(dat)) {
       if (isToday==TRUE) {
-        DayData$Hour[DayData$Date==today] <- 0
+        DayData$Hour[DayData$Date==today()] <- 0
       } else {
-        newLine <- data.frame(Date=today, Hour=0)
+        newLine <- data.frame(Date=today(), Hour=0)
         DayData <-  rbind(DayData, newLine) 
       } 
     }
