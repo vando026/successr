@@ -280,14 +280,13 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
 
   ## LAYOUT 
-  if (!is.null(sp_env$SuccessWindow))
-    dispose(sp_env$SuccessWindow)
+  try(dispose(sp_env$win), silent=TRUE)
 
-  sp_env$SuccessWindow <- gwindow(config$window_title, 
+  sp_env$win <- gwindow(config$window_title, 
     width=620, height=240, visible=FALSE)
 
   # This makes the tabs
-  notebook <- gnotebook (container = sp_env$SuccessWindow )
+  notebook <- gnotebook (container = sp_env$win )
   sp_g0 <- ggroup(label='Main', horizontal=TRUE, 
     spacing=10, container=notebook)
 
@@ -345,7 +344,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
   
   svalue(notebook) <- 1
-  visible(sp_env$SuccessWindow) <- TRUE
+  visible(sp_env$win) <- TRUE
 }
 
 
