@@ -77,7 +77,6 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   
   time_file <- file.path(data_path, "TimeSheet.Rdata")
   day_file <- file.path(data_path, "DayData.csv")
-  today <- function() as.Date(Sys.time())
 
   # Create files if they do not exist
   if(!file.exists(time_file)) {
@@ -348,10 +347,34 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
 }
 
 sp_env <- new.env(parent = emptyenv())
+today <- function() as.Date(Sys.time())
 
 
-plot_year <- function(day_file) {
+#' @title Plot work hours for the year
+#' 
+#' @description  Plots the amount of time you have worked each month for the year.
+#' 
+#' @param data_path Path to your DayData.csv file. If you have set the R_SUCCESS
+#' environment variable then leave the argument as NULL. 
 
-
+success_plot <- function(data_path=NULL) {
+  if (is.null(data_path))
+    day_file <- file.path(Sys.getenv("R_SUCCESS"), "DayData.csv")
+  if (!file.exists(day_file)) 
+    stop("You must set the R_SUCCESS environment variable to your data")
+  dat <- read.csv(day_file)
+  Year <- format(today(), "%Y")
+  dat <- transform(dat, Date=as.Date(Date, origin="1970-01-01"))
+  dat <- subset(dat, format(Date, "%Y")==Year)
+  dat$Month <- format(dat$Date, "%m")
+  dat$MonthLab <- format(dat$Date, "%b")
+  Labs <- dat[!duplicated(dat$Month), c("Month", "MonthLab")]
+  adat <- aggregate(Hour ~ Month, data=dat, FUN=sum)
+  adat <- base::merge(adat, Labs, by = "Month")
+  xx = with(adat, barplot(Hour, names.arg=MonthLab, 
+    ylab="Hours", xlab="Month", ylim=c(0, max(Hour)+20),
+    col = terrain.colors(length(Month)),
+    main = paste("Year", Year)))
+  with(adat, text(x = xx, y= Hour, labels=round(Hour), pos=3))
 }
 
