@@ -347,5 +347,11 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   visible(sp_env$win) <- TRUE
 }
 
-
 sp_env <- new.env(parent = emptyenv())
+
+
+plot_year <- function(day_file) {
+
+
+}
+
