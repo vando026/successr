@@ -356,6 +356,8 @@ today <- function() as.Date(Sys.time())
 #' 
 #' @param data_path Path to your DayData.csv file. If you have set the R_SUCCESS
 #' environment variable then leave the argument as NULL. 
+#'
+#' @export
 
 success_plot <- function(data_path=NULL) {
   if (is.null(data_path))
