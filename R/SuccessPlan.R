@@ -131,6 +131,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
 
   calcMonth <- function(dat) {
+    dat <- subset(dat, format(Date, "%Y")==format(today(), "%Y"))
     dat$Week <- as.numeric(format(dat$Date, "%U"))
     dat <- dat[which(dat$Date > (today()-28)), ]
     dat <- aggregate(Hour ~ Week, data=dat, sum)
@@ -359,13 +360,13 @@ today <- function() as.Date(Sys.time())
 #'
 #' @export
 
-success_plot <- function(data_path=NULL) {
+success_plot <- function(data_path=NULL, Year=NULL) {
   if (is.null(data_path))
     day_file <- file.path(Sys.getenv("R_SUCCESS"), "DayData.csv")
   if (!file.exists(day_file)) 
     stop("You must set the R_SUCCESS environment variable to your data")
   dat <- read.csv(day_file)
-  Year <- format(today(), "%Y")
+  if (is.null(Year)) Year <- format(today(), "%Y")
   dat <- transform(dat, Date=as.Date(Date, origin="1970-01-01"))
   dat <- subset(dat, format(Date, "%Y")==Year)
   dat$Month <- format(dat$Date, "%m")
