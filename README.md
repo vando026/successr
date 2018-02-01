@@ -28,3 +28,4 @@ computers. Labels for _Project 1_, _Project 2_, _Wasted Time_ and
 the _Window Title_ can be changed in the config.yml file. But don't
 waste time doing this, just use the default settings.  
 
+![snapshot](snapshot.JPG)
