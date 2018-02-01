@@ -20,10 +20,10 @@ for a given day (see below).
 
 Upon installation, successr will setup a data folder (where the data is stored) with a
 configuration file, called config.yml. The folder can
-be found in `r Sys.getenv("HOME")`. If you want to specify an alternative folder
+be found in `Sys.getenv("HOME")`. If you want to specify an alternative folder
 path, then you must put in your .Rprofile the following
-line: `r Sys.setenv(R_SUCCESS="my/folder/path")`. In my Rprofile set-up, I have
-`r Sys.setenv("~/Dropbox/vando026/successr")` so I can sync between my work and home
+line: `Sys.setenv(R_SUCCESS="my/folder/path")`. In my Rprofile set-up, I have
+`Sys.setenv("~/Dropbox/vando026/successr")` so I can sync between my work and home
 computers. Labels for _Project 1_, _Project 2_, _Wasted Time_ and
 the _Window Title_ can be changed in the config.yml file. But don't
 waste time doing this, just use the default settings.  
