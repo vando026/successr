@@ -4,7 +4,7 @@
 \alias{success_plot}
 \title{Plot work hours for the year}
 \usage{
-success_plot(data_path = NULL)
+success_plot(data_path = NULL, Year = NULL)
 }
 \arguments{
 \item{data_path}{Path to your DayData.csv file. If you have set the R_SUCCESS
