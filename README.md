@@ -1,5 +1,5 @@
 # successr
-R code for the Ultimate Success Plan
+Tracking work time for Ultimate Success 
 
 You cannot be successful if you waste time. The Ultimate Success Plan is a
 tool for diagnosing the amount of time you waste during the day. Its aim is to finally
@@ -29,3 +29,4 @@ the _Window Title_ can be changed in the config.yml file. But don't
 waste time doing this, just use the default settings.  
 
 ![snapshot](snapshot.JPG)
+![snapshot](snapshot2.JPG)
