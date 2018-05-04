@@ -101,13 +101,18 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     sprintf("%.1d:%.02d", x %/% 1, ifelse(Min==60, 59, Min))
   }
 
+  asDate <- function(x) {
+    as.Date(x, origin="1970-01-01")
+  }
+  
+
   # This is the main time calc function
   calcTime <- function(dat) {
       if(is.null(dat) || nrow(dat) %in% c(0,1)) 
         return(NULL)
       dat$Time2 <- c(dat$Time[2:nrow(dat)],NA)
       dat$Hour <- as.numeric(difftime(dat$Time2,dat$Time, units='hours'))
-      dat$Date <- as.Date(dat$Time)
+      dat$Date <- asDate(dat$Time)
       dat <- dat[which(dat$Hour>=0 & dat$Task!="Stop"), ]
       if(nrow(dat)==0 || (nrow(dat)==1 & is.na(dat$Hour)))  
         return(NULL)
@@ -118,8 +123,8 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
 
   calcWeek <- function(day_file) {
-    dat <- read.csv(day_file,
-      colClasses=c("Date", "numeric"))
+    dat <- read.csv(day_file)
+    dat$Date <- asDate(dat$Date)
     dat <- dat[which(dat$Date > (today()-7)), ]
     if(is.null(dat) || nrow(dat)==0) 
       dat <- data.frame(Date=today(), Hour=0.00) 
@@ -131,6 +136,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
 
   calcMonth <- function(dat) {
+    dat$Date <- asDate(dat$Date)
     dat <- subset(dat, format(Date, "%Y")==format(today(), "%Y"))
     dat$Week <- as.numeric(format(dat$Date, "%U"))
     dat <- dat[which(dat$Date > (today()-28)), ]
@@ -151,8 +157,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
 
   doPlot <- function(day_file) {
-    DayData <- read.csv(day_file,
-      colClasses=c("Date", "numeric"))
+    DayData <- read.csv(day_file)
     out <- calcMonth(DayData)
     f <- tempfile( )
     png(f, units="in",
@@ -201,7 +206,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     load(time_file, envir=environment())
     aLine <- data.frame(Time=Sys.time(), Task=h$action)
     spData <- rbind(spData, aLine)
-    spData <- spData[which(as.Date(spData$Time)==today()), ]
+    spData <- spData[which(asDate(spData$Time)==today()), ]
     if (sanitize==TRUE) {
       spData$Task <- factor(spData$Task,
         levels=c(ggNames, "Stop"))
@@ -251,8 +256,8 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
 
   writeDay <- function(dat, day_file) {
-    DayData <- read.csv(day_file,
-      colClasses=c("Date", "numeric"))
+    DayData <- read.csv(day_file)
+    DayData$Date <- as.Date(DayData$Date, origin="1970-01-01")
     isToday <- any(today() %in% DayData$Date) 
     if(!is.null(dat)) { 
       dat <- dat[!(dat$Task %in% ggNames[3]), ]
@@ -367,7 +372,7 @@ success_plot <- function(data_path=NULL, Year=NULL) {
     stop("You must set the R_SUCCESS environment variable to your data")
   dat <- read.csv(day_file)
   if (is.null(Year)) Year <- format(today(), "%Y")
-  dat <- transform(dat, Date=as.Date(Date, origin="1970-01-01"))
+  dat <- transform(dat, Date=asDate(Date))
   dat <- subset(dat, format(Date, "%Y")==Year)
   dat$Month <- format(dat$Date, "%m")
   dat$MonthLab <- format(dat$Date, "%b")

@@ -10,7 +10,7 @@ successr(verbose = FALSE, sanitize = FALSE)
 \item{verbose}{prints out configuration settings.}
 
 \item{sanitize}{clears out unused labels from the Task dropdown menu in the \code{Edit}
-window. This issue often merges when you waste time tinkering with button labels.}
+window. This issue often happens when you waste time tinkering with button labels.}
 }
 \description{
 A diagnostic tool for quantifying time wastage.
@@ -33,7 +33,7 @@ of work time. \code{Edit} allows you to edit only the time recorded during the d
 the Task (from a drop-down menu).  \code{DayData.csv} allows you to edit the total time
 for a given day (see below). 
 
-Upon installation, successr will setup a data folder (where the data is stored) with a
+Upon installation, \code{successr} will setup a data folder (where the data is stored) with a
 configuration file, called \code{config.yml} (see \code{\link{config}}). The folder can
 be found in \code{Sys.getenv("HOME")}. If you want to specify an alternative folder
 path, then you must put in your .Rprofile (see \code{\link{Startup}}) the following
