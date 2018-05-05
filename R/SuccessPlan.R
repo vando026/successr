@@ -104,7 +104,25 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   asDate <- function(x) {
     as.Date(x, origin="1970-01-01")
   }
-  
+ 
+  readCSV <- function(day_file) {
+    dat <- read.csv(day_file, as.is=TRUE)
+    x <- dat$Date[1]
+    f1 <- "%Y-%m-%d"; f2 <- "%d/%m/%Y"
+    getCSV <- function(ff) {
+       dat <- read.csv(day_file, as.is=TRUE)
+       dat$Date <- as.Date(dat$Date, ff)
+       dat
+    }
+    if (!is.na(as.Date(x, f1))) {
+     return(getCSV(f1))
+    } else if (!is.na(as.Date(x, f2))) {
+     return(getCSV(f2))
+    } else {
+     stop(paste("All dates in", day_file, "must be in either",
+      f1, "or", f2, "format."))  
+   }
+ }
 
   # This is the main time calc function
   calcTime <- function(dat) {
@@ -123,8 +141,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
 
   calcWeek <- function(day_file) {
-    dat <- read.csv(day_file)
-    dat$Date <- asDate(dat$Date)
+    dat <- readCSV(day_file)
     dat <- dat[which(dat$Date > (today()-7)), ]
     if(is.null(dat) || nrow(dat)==0) 
       dat <- data.frame(Date=today(), Hour=0.00) 
@@ -135,8 +152,8 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     dat
   }
 
-  calcMonth <- function(dat) {
-    dat$Date <- asDate(dat$Date)
+  calcMonth <- function(day_file) {
+    dat <- readCSV(day_file)
     dat <- subset(dat, format(Date, "%Y")==format(today(), "%Y"))
     dat$Week <- as.numeric(format(dat$Date, "%U"))
     dat <- dat[which(dat$Date > (today()-28)), ]
@@ -157,8 +174,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
 
   doPlot <- function(day_file) {
-    DayData <- read.csv(day_file)
-    out <- calcMonth(DayData)
+    out <- calcMonth(day_file)
     f <- tempfile( )
     png(f, units="in",
          width=3.6, height=1.8, pointsize=8, res=100, type="cairo")
@@ -256,8 +272,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
 
   writeDay <- function(dat, day_file) {
-    DayData <- read.csv(day_file)
-    DayData$Date <- as.Date(DayData$Date, origin="1970-01-01")
+    DayData <- readCSV(day_file)
     isToday <- any(today() %in% DayData$Date) 
     if(!is.null(dat)) { 
       dat <- dat[!(dat$Task %in% ggNames[3]), ]
@@ -370,7 +385,7 @@ success_plot <- function(data_path=NULL, Year=NULL) {
     day_file <- file.path(Sys.getenv("R_SUCCESS"), "DayData.csv")
   if (!file.exists(day_file)) 
     stop("You must set the R_SUCCESS environment variable to your data")
-  dat <- read.csv(day_file)
+  dat <- readCSV(day_file)
   if (is.null(Year)) Year <- format(today(), "%Y")
   dat <- transform(dat, Date=asDate(Date))
   dat <- subset(dat, format(Date, "%Y")==Year)
