@@ -107,7 +107,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
  
   readCSV <- function(day_file) {
-    dat <- read_csv(day_file)
+    dat <- suppressMessages(read_csv(day_file))
     if (class(dat$Date)=="Date") {
       return(dat)
     } else if (class(dat$Date)=="character"){
