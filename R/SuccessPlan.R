@@ -106,23 +106,22 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
  
   readCSV <- function(day_file) {
-    dat <- read.csv(day_file, as.is=TRUE)
-    x <- dat$Date[1]
-    f1 <- "%Y-%m-%d"; f2 <- "%Y/%m/%d"; f3 <- "%d/%m/%Y"
+    browser()
+    dat <- read_csv(day_file)
+    f1 <- "%d/%m/%Y"
     getCSV <- function(ff) {
        dat <- read.csv(day_file, as.is=TRUE)
        dat$Date <- as.Date(dat$Date, ff)
        dat
     }
-    if (!is.na(as.Date(x, f1))) {
-     return(getCSV(f1))
-    } else if (!is.na(as.Date(x, f2))){
-     return(getCSV(f2)) 
-    } else if (!is.na(as.Date(x, f3))) {
-     return(getCSV(f3))
+    if (class(dat$Date)=="Date") {
+      return(dat)
+    } else if (class(dat$Date)=="character"){
+      dat$Date <- as.Date(dat$Date, format="f1") 
+      return(dat)
     } else {
-     stop(paste("All dates in", day_file, "must be in either",
-      f1, f2, "or", f3, "format."))  
+     stop(paste("All dates in", day_file, 
+      "must be in either %Y-%m-%d or", f1, "format."))  
    }
  }
 

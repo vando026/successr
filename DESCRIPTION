@@ -8,5 +8,5 @@ Author: Alain Vandormael <vando026@umn.edu>
 Maintainer: Alain Vandormael <vando026@umn.edu>
 Encoding: UTF-8
 RoxygenNote: 6.0.1
-Imports: config, memoise, RGtk2, gWidgets2, digest, gWidgets2RGtk2 (>= 1.0-6)
+Imports: config, memoise, RGtk2, gWidgets2, digest, gWidgets2RGtk2 (>= 1.0-6), readr
 
