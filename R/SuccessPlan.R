@@ -47,6 +47,7 @@
 #' @importFrom graphics par
 #' @importFrom stats aggregate na.omit
 #' @importFrom utils capture.output read.csv write.csv
+#' @importFrom readr read_csv
 #' 
 #' @export
 
@@ -106,22 +107,21 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
  
   readCSV <- function(day_file) {
-    browser()
     dat <- read_csv(day_file)
-    f1 <- "%d/%m/%Y"
-    getCSV <- function(ff) {
-       dat <- read.csv(day_file, as.is=TRUE)
-       dat$Date <- as.Date(dat$Date, ff)
-       dat
-    }
     if (class(dat$Date)=="Date") {
       return(dat)
     } else if (class(dat$Date)=="character"){
-      dat$Date <- as.Date(dat$Date, format="f1") 
-      return(dat)
+      f1 <- "%d/%m/%Y"
+      if (!is.na(as.Date(dat$Date[1], f1))) {
+        dat$Date <- as.Date(dat$Date, format=f1) 
+        return(dat)
+      } else {
+        stop(paste("All dates in", day_file, 
+        "must be in either %Y-%m-%d or", f1, "format."))  
+      }
     } else {
-     stop(paste("All dates in", day_file, 
-      "must be in either %Y-%m-%d or", f1, "format."))  
+     stop(paste("Dates in", day_file, 
+      "must be in character or date format."))  
    }
  }
 
