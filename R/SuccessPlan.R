@@ -106,24 +106,6 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     as.Date(x, origin="1970-01-01")
   }
  
-  readCSV <- function(day_file) {
-    dat <- suppressMessages(read_csv(day_file))
-    if (class(dat$Date)=="Date") {
-      return(dat)
-    } else if (class(dat$Date)=="character"){
-      f1 <- "%d/%m/%Y"
-      if (!is.na(as.Date(dat$Date[1], f1))) {
-        dat$Date <- as.Date(dat$Date, format=f1) 
-        return(dat)
-      } else {
-        stop(paste("All dates in", day_file, 
-        "must be in either %Y-%m-%d or", f1, "format."))  
-      }
-    } else {
-     stop(paste("Dates in", day_file, 
-      "must be in character or date format."))  
-   }
- }
 
   # This is the main time calc function
   calcTime <- function(dat) {
@@ -367,10 +349,28 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   svalue(notebook) <- 1
   visible(sp_env$win) <- TRUE
 }
-
 sp_env <- new.env(parent = emptyenv())
+
 today <- function() as.Date(Sys.time())
 
+readCSV <- function(day_file) {
+  dat <- suppressMessages(read_csv(day_file))
+  if (class(dat$Date)=="Date") {
+    return(dat)
+  } else if (class(dat$Date)=="character"){
+    f1 <- "%d/%m/%Y"
+    if (!is.na(as.Date(dat$Date[1], f1))) {
+      dat$Date <- as.Date(dat$Date, format=f1) 
+      return(dat)
+    } else {
+      stop(paste("All dates in", day_file, 
+      "must be in either %Y-%m-%d, %Y/%m/%d or", f1, "format."))  
+    }
+  } else {
+   stop(paste("Dates in", day_file, 
+    "must be in character or date format."))  
+ }
+}
 
 #' @title Plot work hours for the year
 #' 
@@ -388,7 +388,6 @@ success_plot <- function(data_path=NULL, Year=NULL) {
     stop("You must set the R_SUCCESS environment variable to your data")
   dat <- readCSV(day_file)
   if (is.null(Year)) Year <- format(today(), "%Y")
-  dat <- transform(dat, Date=asDate(Date))
   dat <- subset(dat, format(Date, "%Y")==Year)
   dat$Month <- format(dat$Date, "%m")
   dat$MonthLab <- format(dat$Date, "%b")
@@ -401,4 +400,5 @@ success_plot <- function(data_path=NULL, Year=NULL) {
     main = paste("Year", Year)))
   with(adat, text(x = xx, y= Hour, labels=round(Hour), pos=3))
 }
+
 
