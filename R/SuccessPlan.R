@@ -2,10 +2,10 @@
 #' 
 #' @description  A diagnostic tool for tracking work and wasted time.
 #' 
-#' @details You cannot be successful if you waste time. \code{successr} is a
-#' tool for tracking the amount of time you work and waste during the day. At a metaphysical level, time
+#' @details \code{successr} is a
+#' tool for tracking the amount of time you work (and waste) during the day. At a metaphysical level, time
 #' can be divided into two categories: work time and wasted time. Work time is effectively
-#' used when you focus on at most two projects during the day that you think are relevant.
+#' used when you focus on at most two relevant projects during the day.
 #' \code{Wasted Time} includes anything that does not fall in \code{Project 1} and/or
 #' \code{Project 2}.  Culprits for \code{Wasted Time} are typically
 #' toilet/cigarette/watercooler excursions, lunch breaks, unannounced visits by the boss,
@@ -23,13 +23,13 @@
 #' be found in \code{Sys.getenv("HOME")}. If you want to specify an alternative folder
 #' path, then you must put in your .Rprofile (see \code{\link{Startup}}) the following
 #' line: \code{Sys.setenv(R_SUCCESS="my/folder/path")}. In my Rprofile set-up, I have
-#' \code{Sys.setenv("~/Dropbox/vando026/successr")} so I can sync between my work and home
+#' \code{Sys.setenv("~/Dropbox/successr")} so I can sync between my work and home
 #' computers. Labels for \code{Project 1}, \code{Project 2}, \code{Wasted Time} and
 #' the \code{Window Title} can be changed in the \code{config.yml} file. But don't
 #' waste time doing this, just use the default settings.  
 #'
 #' Requires \code{GTK} libraries to work that you may (or may not) have to manually install
-#' yourself (which will waste some time). The Ultimate Success Plan project is in the
+#' yourself (which will waste some time). _successr_ is in the
 #' development phase, please report bugs to me by typing in the \code{R} console
 #' \code{packageDescription("successr")}.
 #'
