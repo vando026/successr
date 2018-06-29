@@ -2,7 +2,7 @@
 % Please edit documentation in R/SuccessPlan.R
 \name{successr}
 \alias{successr}
-\title{The Ultimate Success Plan}
+\title{successr}
 \usage{
 successr(verbose = FALSE, sanitize = FALSE)
 }
@@ -13,12 +13,11 @@ successr(verbose = FALSE, sanitize = FALSE)
 window. This issue often happens when you waste time tinkering with button labels.}
 }
 \description{
-A diagnostic tool for quantifying time wastage.
+A diagnostic tool for tracking work and wasted time.
 }
 \details{
-You cannot be successful if you waste time. The Ultimate Success Plan is a
-tool for diagnosing the amount of time you waste during the day. Its aim is to finally
-convince you that you don't really work 8 hours a day.  At a metaphysical level, time
+You cannot be successful if you waste time. \code{successr} is a
+tool for tracking the amount of time you work and waste during the day. At a metaphysical level, time
 can be divided into two categories: work time and wasted time. Work time is effectively
 used when you focus on at most two projects during the day that you think are relevant.
 \code{Wasted Time} includes anything that does not fall in \code{Project 1} and/or
