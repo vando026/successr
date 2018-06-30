@@ -8,7 +8,8 @@ during the day.  _Wasted Time_ includes anything that does not fall in _Project 
 _Project 2_.  Culprits for _Wasted Time_ are typically toilet/cigarette/watercooler
 excursions, lunch breaks, unannounced visits by the boss, any meeting, internet surfing,
 chit chat with colleagues, or courtesy calls by telemarketers, friends/family, and
-partner(s).
+partner(s). Effective time use is surely the first step to ultimate
+success.[<sup>1</sup>](https://www.amazon.com/Getting-Things-Done-ABCs-Management/dp/B004JFYWO2)
 
 Clicking _Project 1_, _Project 2_, and _Wasted Time_ starts the timer,
 and _Stop_ stops the timer. _Report_ gives a daily, weekly, monthly breakdown
