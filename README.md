@@ -26,5 +26,13 @@ home computers. Labels for _Project 1_, _Project 2_, _Wasted Time_ and the _Wind
 can be changed in the config.yml file. But don't waste time doing this, just use the
 default settings.  
 
+_devtools_ is recommended for install. 
+
+<code>
+library(devtools)
+install_github("vando026/successr")
+</code>
+
+
 ![snapshot](snapshot.JPG)
 ![snapshot](snapshot2.JPG)
