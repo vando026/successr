@@ -29,8 +29,9 @@ default settings.
 _devtools_ is recommended for install. 
 
 <code>
-library(devtools)
+library(devtools);
 install_github("vando026/successr")
+
 </code>
 
 

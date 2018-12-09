@@ -28,10 +28,6 @@
 #' the \code{Window Title} can be changed in the \code{config.yml} file. But don't
 #' waste time doing this, just use the default settings.  
 #'
-#' \code{devtools} is recommended for install. 
-#'
-#' \code{library(devtools)}; \code{install_github("vando026/successr")}
-#' 
 #' Requires \code{GTK} libraries to work that you may (or may not) have to manually install
 #' yourself (which will waste some time). \code{successr} is in the
 #' development phase, please report bugs to me by typing in the \code{R} console
