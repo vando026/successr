@@ -10,7 +10,7 @@ successr(verbose = FALSE, sanitize = FALSE)
 \item{verbose}{prints out configuration settings.}
 
 \item{sanitize}{clears out unused labels from the Task dropdown menu in the \code{Edit}
-window. This issue often happens when you waste time tinkering with button labels.}
+window.}
 }
 \description{
 A diagnostic tool for tracking work and wasted time.
@@ -42,8 +42,12 @@ computers. Labels for \code{Project 1}, \code{Project 2}, \code{Wasted Time} and
 the \code{Window Title} can be changed in the \code{config.yml} file. But don't
 waste time doing this, just use the default settings.  
 
+\code{devtools} is recommended for install. 
+
+\code{library(devtools)}; \code{install_github("vando026/successr")}
+
 Requires \code{GTK} libraries to work that you may (or may not) have to manually install
-yourself (which will waste some time). _successr_ is in the
+yourself (which will waste some time). \code{successr} is in the
 development phase, please report bugs to me by typing in the \code{R} console
 \code{packageDescription("successr")}.
 }

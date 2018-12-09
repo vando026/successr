@@ -28,25 +28,27 @@
 #' the \code{Window Title} can be changed in the \code{config.yml} file. But don't
 #' waste time doing this, just use the default settings.  
 #'
+#' \code{devtools} is recommended for install. 
+#'
+#' \code{library(devtools)}; \code{install_github("vando026/successr")}
+#' 
 #' Requires \code{GTK} libraries to work that you may (or may not) have to manually install
-#' yourself (which will waste some time). _successr_ is in the
+#' yourself (which will waste some time). \code{successr} is in the
 #' development phase, please report bugs to me by typing in the \code{R} console
 #' \code{packageDescription("successr")}.
 #'
 #' @param verbose prints out configuration settings.
 #' 
 #' @param sanitize clears out unused labels from the Task dropdown menu in the \code{Edit}
-#' window. This issue often happens when you waste time tinkering with button labels. 
+#' window. 
 #'
 #' @import config 
-#' @importFrom gWidgets2 gbutton gaction gnotebook gimage svalue gtable addSpace gwindow
-#' size<- ggroup dispose size gseparator glabel svalue<- visible<- font<-
-#' addHandlerChanged gdf
-#' @importFrom grDevices dev.off png
-#' @importFrom graphics par
-#' @importFrom stats aggregate na.omit
-#' @importFrom utils capture.output read.csv write.csv
-#' @importFrom readr read_csv
+#' @import gWidgets2 
+#' @import grDevices 
+#' @import graphics 
+#' @import stats 
+#' @import utils 
+#' @import readr 
 #' 
 #' @export
 
