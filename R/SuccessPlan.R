@@ -135,15 +135,17 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   calcMonth <- function(day_file) {
     dat <- readCSV(day_file)
     dat <- subset(dat, format(Date, "%Y")==format(today(), "%Y"))
-    dat$Week <- as.numeric(format(dat$Date, "%U"))
+    if (nrow(dat)==0) dat <- data.frame(Date=today(), Hour=0)
+    # R defines first week as week 0
+    dat$Week <- as.numeric(format(dat$Date, "%U")) + 1
     dat <- dat[which(dat$Date > (today()-28)), ]
     dat <- aggregate(Hour ~ Week, data=dat, sum)
     if(nrow(dat)<4) {
       firstMnth <- min(dat$Week)
-      dat4 <- data.frame(Week =c(firstMnth:(firstMnth+3)))
+      dat4 <- data.frame(Week = c(firstMnth:(firstMnth+3)))
     } else {
       lastMnth <- max(dat$Week)
-      dat4 <- data.frame(Week =c((lastMnth-3):lastMnth))
+      dat4 <- data.frame(Week = c((lastMnth-3):lastMnth))
     }
     dat <- base::merge(dat4, dat, by="Week", all.x=TRUE)
     dat$Hour <- ifelse(!is.na(dat$Hour), dat$Hour, 0.00)
