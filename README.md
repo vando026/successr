@@ -31,5 +31,5 @@ _devtools_ is recommended for install.  <code> library(devtools); install_github
 <p></p>
 
 
-![snapshot](snapshot.JPG)
-![snapshot](snapshot2.JPG)
+![snapshot](snapshot.jpg)
+![snapshot](snapshot2.jpg)
