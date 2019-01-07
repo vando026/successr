@@ -375,17 +375,17 @@ readCSV <- function(day_file) {
 #' 
 #' @description  Plots the amount of time you have worked each month for the year.
 #' 
-#' @param data_path Path to your DayData.csv file. If you have set the R_SUCCESS
-#' environment variable then leave the argument as NULL. 
+#' @param data_path Path to your DayData.csv file. The default is 
+#' Sys.getenv("R_SUCCESS"), "DayData.csv")
 #'
 #' @export
 
-success_plot <- function(data_path=NULL, Year=NULL) {
-  if (is.null(data_path))
-    day_file <- file.path(Sys.getenv("R_SUCCESS"), "DayData.csv")
-  if (!file.exists(day_file)) 
+success_plot <- function(
+  data_path=file.path(Sys.getenv("R_SUCCESS"), "DayData.csv"), 
+  Year=NULL) {
+  if (!file.exists(data_path)) 
     stop("You must set the R_SUCCESS environment variable to your data")
-  dat <- readCSV(day_file)
+  dat <- readCSV(data_path)
   if (is.null(Year)) Year <- format(today(), "%Y")
   dat <- subset(dat, format(Date, "%Y")==Year)
   dat$Month <- format(dat$Date, "%m")
@@ -400,4 +400,20 @@ success_plot <- function(data_path=NULL, Year=NULL) {
   with(adat, text(x = xx, y= Hour, labels=round(Hour), pos=3))
 }
 
+#' @title load_daydata
+#' 
+#' @description Load the DayData.csv dataset.
+#' 
+#' @param data_path Path to your DayData.csv file. The default is 
+#' Sys.getenv("R_SUCCESS"), "DayData.csv")
+#'
+#' @return 
+#'
+#' @export 
+load_daydata <- function(
+  data_path=file.path(Sys.getenv("R_SUCCESS"), "DayData.csv")) {
+  if (!file.exists(data_path)) 
+    stop("You must set the R_SUCCESS environment variable to your data")
+  readCSV(data_path)
+}
 
