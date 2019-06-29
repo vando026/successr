@@ -384,7 +384,7 @@ success_plot <- function(
   data_path=file.path(Sys.getenv("R_SUCCESS"), "DayData.csv"), 
   Year=NULL) {
   if (!file.exists(data_path)) 
-    stop("You must set the R_SUCCESS environment variable to your data")
+    stop("You must set the R_SUCCESS environment variable or provide a file path to the data.")
   dat <- readCSV(data_path)
   if (is.null(Year)) Year <- format(today(), "%Y")
   dat <- subset(dat, format(Date, "%Y")==Year)
