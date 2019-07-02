@@ -414,6 +414,9 @@ load_daydata <- function(
   data_path=file.path(Sys.getenv("R_SUCCESS"), "DayData.csv")) {
   if (!file.exists(data_path)) 
     stop("You must set the R_SUCCESS environment variable to your data")
-  readCSV(data_path)
+  dat <- readCSV(data_path)
+  dat <- mutate(dat, 
+    Year = as.integer(format(Date, "%Y")),
+    Month = as.integer(format(Date, "%m")))
 }
 
