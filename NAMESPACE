@@ -2,6 +2,7 @@
 
 export(load_daydata)
 export(success_plot)
+export(success_summary)
 export(successr)
 import(config)
 import(gWidgets2)

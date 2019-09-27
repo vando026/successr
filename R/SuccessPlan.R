@@ -418,5 +418,46 @@ load_daydata <- function(
   dat <- dplyr::mutate(dat, 
     Year = as.integer(format(Date, "%Y")),
     Month = as.integer(format(Date, "%m")))
+  dat
 }
 
+
+#' @title success_summary
+#' 
+#' @description  Summary statistics of time worked
+#' 
+#' @param  Year a vector of year to report 
+#' 
+#' @return 
+#'
+#' @export 
+
+success_summary <- function() {
+  dat <- load_daydata()
+  Yrs <- unique(dat$Year)
+  sc <- function(x) {
+    len <- nchar(x) 
+    ns <- 5 - len
+    paste(rep(" ", ns), collapse="")
+  }
+  getDat <- function(year) {
+    dat <- dplyr::filter(dat, Year == year)
+    sum_hour <- round(sum(dat$Hour, na.rm=TRUE))
+    mnths <- length(unique(dat$Month))
+    ave_mnth <- as.character(round(sum_hour/mnths))
+    sum_hour <- as.character(sum_hour)
+    days <- length(unique(dat$Date[dat$Hour>1])) 
+    days <- as.character(ifelse(is.null(days), 0, days))
+    lft <- "|"
+    rgt <- "|\n"
+    cat(paste(lft, "======= Year:", year, "=========", rgt))
+    cat(paste(lft, "Total hours worked  :", sum_hour, sc(sum_hour), rgt))
+    cat(paste(lft, "Ave. monthly hours  :", ave_mnth, sc(ave_mnth),  rgt))
+    cat(paste(lft, "Days worked >1 hour :", days, sc(days), rgt))
+  }
+  cat("\n")
+  cat(paste(rep("-", 32), collapse=""), "\n")
+  for (i in Yrs) getDat(i)
+  cat(paste(rep("-", 32), collapse=""), "\n")
+}
+success_summary()
