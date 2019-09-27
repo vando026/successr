@@ -424,9 +424,7 @@ load_daydata <- function(
 
 #' @title success_summary
 #' 
-#' @description  Summary statistics of time worked
-#' 
-#' @param  Year a vector of year to report 
+#' @description  Provides summary statistics for time worked by year. 
 #' 
 #' @return 
 #'
