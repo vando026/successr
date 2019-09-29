@@ -458,4 +458,3 @@ success_summary <- function() {
   for (i in Yrs) getDat(i)
   cat(paste(rep("-", 32), collapse=""), "\n")
 }
-success_summary()
