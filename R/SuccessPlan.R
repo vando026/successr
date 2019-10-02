@@ -441,8 +441,13 @@ success_summary <- function() {
   getDat <- function(year) {
     dat <- dplyr::filter(dat, Year == year)
     sum_hour <- round(sum(dat$Hour, na.rm=TRUE))
-    mnths <- length(unique(dat$Month))
-    ave_mnth <- as.character(round(sum_hour/mnths))
+    if (year == as.integer(format(Sys.time(), "%Y"))) {
+      days <- as.numeric(format(Sys.time(), "%j"))
+      ave_mnth <- as.character(round((sum_hour/days) * (365.25/12)))
+    } else {
+      mnths <- length(unique(dat$Month))
+      ave_mnth <- as.character(round(sum_hour/mnths))
+    }
     sum_hour <- as.character(sum_hour)
     days <- length(unique(dat$Date[dat$Hour>1])) 
     days <- as.character(ifelse(is.null(days), 0, days))
