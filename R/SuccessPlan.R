@@ -426,40 +426,53 @@ load_daydata <- function(
 #' 
 #' @description  Provides summary statistics for time worked by year. 
 #' 
+#' @param year Year to report; default = NULL to report for all available years.
+#' @param more_than A vector of integers to report number of days worker for more than x
+#' hours. 
+#' 
 #' @return 
 #'
 #' @export 
 
-success_summary <- function() {
+success_summary <- function(year=NULL, more_than=c(3, 5)) {
   dat <- load_daydata()
-  Yrs <- unique(dat$Year)
-  sc <- function(x) {
-    len <- nchar(x) 
-    ns <- 5 - len
-    paste(rep(" ", ns), collapse="")
+  if (is.null(year)) year <- unique(dat$Year)
+  stopifnot(more_than %in% 0:24) 
+  lft <- "|"
+  rgt <- "|\n"
+  # Add padding to table
+  w4 <- function(x) formatC(x, width=4)
+  # Print out more_than lines
+  mfun <- function(dat) {
+    function(x) {
+      xdays <- length(unique(dat$Date[dat$Hour > x])) 
+      xdays <- ifelse(is.null(xdays), 0, xdays)
+      cat(paste0(lft, " Days worked >", format(x, width=2), " hour(s): ", w4(xdays), " ",  rgt))
+    }
   }
-  getDat <- function(year) {
-    dat <- dplyr::filter(dat, Year == year)
+  getDat <- function(iyear) {
+    dat <- dplyr::filter(dat, Year == iyear)
     sum_hour <- round(sum(dat$Hour, na.rm=TRUE))
-    if (year == as.integer(format(Sys.time(), "%Y"))) {
-      days <- as.numeric(format(Sys.time(), "%j"))
+    days <- as.numeric(format(Sys.time(), "%j"))
+    if (iyear == as.integer(format(Sys.time(), "%Y"))) {
       ave_mnth <- as.character(round((sum_hour/days) * (365.25/12)))
     } else {
       mnths <- length(unique(dat$Month))
       ave_mnth <- as.character(round(sum_hour/mnths))
+      todate <- sum(dat$Hour[as.numeric(format(dat$Date, "%j"))<=days])
+      todate <- as.character(round(todate))
     }
     sum_hour <- as.character(sum_hour)
-    days <- length(unique(dat$Date[dat$Hour>1])) 
-    days <- as.character(ifelse(is.null(days), 0, days))
-    lft <- "|"
-    rgt <- "|\n"
-    cat(paste(lft, "======= Year:", year, "=========", rgt))
-    cat(paste(lft, "Total hours worked  :", sum_hour, sc(sum_hour), rgt))
-    cat(paste(lft, "Ave. monthly hours  :", ave_mnth, sc(ave_mnth),  rgt))
-    cat(paste(lft, "Days worked >1 hour :", days, sc(days), rgt))
+    cat(paste(lft, "======== Year:", iyear, "=========", rgt))
+    cat(paste(lft, "Total hours worked     :", w4(sum_hour), rgt))
+    if (iyear != as.integer(format(Sys.time(), "%Y"))) 
+        cat(paste(lft, "Total hours to date    :", w4(todate),  rgt))
+    cat(paste(lft, "Ave. monthly hours     :", w4(ave_mnth),  rgt))
+    mfun1 <- mfun(dat)
+    lapply(more_than, mfun1)
   }
   cat("\n")
   cat(paste(rep("-", 32), collapse=""), "\n")
-  for (i in Yrs) getDat(i)
+  for (i in year) getDat(i)
   cat(paste(rep("-", 32), collapse=""), "\n")
 }

@@ -4,14 +4,17 @@
 \alias{success_summary}
 \title{success_summary}
 \usage{
-success_summary(Year = 2018)
+success_summary(year = NULL, more_than = c(3, 5))
 }
 \arguments{
-\item{Year}{an integer of the year}
+\item{year}{Year to report; default = NULL to report for all available years.}
+
+\item{more_than}{A vector of integers to report number of days worker for more than x
+hours.}
 }
 \value{
 
 }
 \description{
-Summary statistics of time worked
+Provides summary statistics for time worked by year.
 }
