@@ -447,7 +447,7 @@ success_summary <- function(year=NULL, more_than=c(3, 5)) {
     function(x) {
       xdays <- length(unique(dat$Date[dat$Hour > x])) 
       xdays <- ifelse(is.null(xdays), 0, xdays)
-      cat(paste0(lft, " Days worked >", format(x, width=2), " hour(s): ", w4(xdays), " ",  rgt))
+      cat(paste0(lft, " Days worked >", formatC(x, width=2), " hour(s): ", w4(xdays), " ",  rgt))
     }
   }
   getDat <- function(iyear) {
