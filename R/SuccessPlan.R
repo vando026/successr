@@ -378,7 +378,13 @@ readCSV <- function(day_file) {
 #' @param data_path Path to your DayData.csv file. The default is 
 #' Sys.getenv("R_SUCCESS"), "DayData.csv")
 #'
+#' @param Year The default is to plot the data for the current year if data exists for
+#' less than one year. If there is more than one year of data, then all years are plotted
+#' by month. Plot the data by a single year by providing a numberic value. 
+#' @import dplyr 
 #' @export
+#' @examples
+#' success_plot(Year=2019)
 
 success_plot <- function(
   data_path=file.path(Sys.getenv("R_SUCCESS"), "DayData.csv"), 
@@ -386,19 +392,52 @@ success_plot <- function(
   if (!file.exists(data_path)) 
     stop("You must set the R_SUCCESS environment variable or provide a file path to the data.")
   dat <- readCSV(data_path)
-  if (is.null(Year)) Year <- format(today(), "%Y")
-  dat <- subset(dat, format(Date, "%Y")==Year)
-  dat$Month <- format(dat$Date, "%m")
+  dat$Years <- as.integer(format(dat$Date, "%Y"))
+  dat$Month <- as.integer(format(dat$Date, "%m"))
   dat$MonthLab <- format(dat$Date, "%b")
   Labs <- dat[!duplicated(dat$Month), c("Month", "MonthLab")]
-  adat <- aggregate(Hour ~ Month, data=dat, FUN=sum)
-  adat <- base::merge(adat, Labs, by = "Month")
-  xx = with(adat, barplot(Hour, names.arg=MonthLab, 
-    ylab="Hours", xlab="Month", ylim=c(0, max(Hour)+20),
-    col = terrain.colors(length(Month)),
-    main = paste("Year", Year)))
-  with(adat, text(x = xx, y= Hour, labels=round(Hour), pos=3))
+  #
+  if (is.null(Year) & length(unique(dat$Years)) >= 2) {
+    byYearFun(dat, Labs) 
+  } else {
+    if (is.null(Year)) Year <- as.integer(format(today(), "%Y"))
+    dat <- dat[dat$Years==Year, ]
+    adat <- aggregate(Hour ~ Month, data=dat, FUN=sum) 
+    adat <- base::merge(adat, Labs, by = "Month")
+    dev.new(width=7, height=7, unit="in")
+    xx = with(adat, barplot(Hour, names.arg=MonthLab, 
+      ylab="Hours", xlab="Month", ylim=c(0, max(Hour)+20),
+      col = terrain.colors(length(Month)), font.lab=2,
+      main = paste("Year", Year)))
+    with(adat, text(x = xx, y= Hour, labels=round(Hour), pos=3))
+  }
 }
+
+#' @title Plot work hours by year and month
+#' 
+#' @description  Plots the amount of time you have worked each month by year.
+#' 
+#' @param Lab Argument received from success_plot()
+#'
+#' @import dplyr 
+
+byYearFun <- function(dat, Lab=NULL) {
+  dat <- dplyr::group_by(dat, Years, Month) %>% 
+    dplyr::summarize(Total = sum(Hour))
+  dat <- dplyr::arrange(dat, Month, Years)
+  dat <- dplyr::left_join(dat, Lab, by="Month")
+  dat <- reshape(as.data.frame(dat), v.names="Total", idvar = "Month", 
+    timevar="Years", direction="wide")
+  rownames(dat) <- dat$MonthLab
+  dat <- t(dat[, -c(1, 2)])
+  dat <- dat[order(rownames(dat)), ]
+  dev.new(width=10, height=5, unit="in")
+  barplot(dat, beside=TRUE, ylab="Hours", 
+    col=terrain.colors(nrow(dat)), font.lab=2,
+    legend.text=as.character(gsub("Total.", "", rownames(dat))))
+}
+
+
 
 #' @title load_daydata
 #' 
