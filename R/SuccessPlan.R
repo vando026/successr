@@ -371,7 +371,7 @@ readCSV <- function(day_file) {
  }
 }
 
-#' @title Plot work hours for the year
+#' @title success_plot
 #' 
 #' @description  Plots the amount of time you have worked each month for the year.
 #' 
@@ -413,7 +413,7 @@ success_plot <- function(
   }
 }
 
-#' @title Plot work hours by year and month
+#' @title byYearFun
 #' 
 #' @description  Plots the amount of time you have worked each month by year.
 #' 
@@ -422,10 +422,10 @@ success_plot <- function(
 #' @import dplyr 
 
 byYearFun <- function(dat, Lab=NULL) {
-  dat <- dplyr::group_by(dat, Years, Month) %>% 
-    dplyr::summarize(Total = sum(Hour))
-  dat <- dplyr::arrange(dat, Month, Years)
-  dat <- dplyr::left_join(dat, Lab, by="Month")
+  dat <- group_by(dat, Years, Month) %>% 
+    summarize(Total = sum(Hour))
+  dat <- arrange(dat, Month, Years)
+  dat <- left_join(dat, Lab, by="Month")
   dat <- reshape(as.data.frame(dat), v.names="Total", idvar = "Month", 
     timevar="Years", direction="wide")
   rownames(dat) <- dat$MonthLab
