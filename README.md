@@ -26,7 +26,7 @@ home computers. Labels for _Project 1_, _Project 2_, _Wasted Time_ and the _Wind
 can be changed in the config.yml file. But don't waste time doing this, just use the
 default settings.  
 
-_remoted is recommended for install.  <code> remotes::install_github("vando026/successr") </code>
+The `remotes` package is needed for install.  <code> remotes::install_github("vando026/successr") </code>
 
 <p></p>
 
