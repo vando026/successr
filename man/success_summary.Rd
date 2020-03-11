@@ -12,9 +12,6 @@ success_summary(year = NULL, more_than = c(3, 5))
 \item{more_than}{A vector of integers to report number of days worker for more than x
 hours.}
 }
-\value{
-
-}
 \description{
 Provides summary statistics for time worked by year.
 }

@@ -3,9 +3,9 @@ Title: The Ultimate Success Plan
 Description: R Tool to track and diagnose wasted time.
 Version: 0.0.6
 License: GPL-3
-Depends: R (>= 3.4.1)
+Depends: R (>= 3.6.0)
 Author: Alain Vandormael <albundy79@gmail.com>
 Maintainer: Alain Vandormael <albundy79@gmail.com>
 Encoding: UTF-8
-RoxygenNote: 6.1.1
-Imports: config, memoise, RGtk2, gWidgets2, digest, gWidgets2RGtk2 (>= 1.0-6), readr, dplyr
+RoxygenNote: 7.0.2
+Imports: config, stats, memoise, RGtk2, gWidgets2, digest, gWidgets2RGtk2 (>= 1.0-6), readr, dplyr

@@ -42,7 +42,6 @@
 #' @import gWidgets2 
 #' @import grDevices 
 #' @import graphics 
-#' @import stats 
 #' @import utils 
 #' @import readr 
 #' 
@@ -114,8 +113,8 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
       dat <- dat[which(dat$Hour>=0 & dat$Task!="Stop"), ]
       if(nrow(dat)==0 || (nrow(dat)==1 & is.na(dat$Hour)))  
         return(NULL)
-      dat <- aggregate(Hour ~ Task + Date, data=dat,
-        sum, na.action=na.omit)
+      dat <- stats::aggregate(Hour ~ Task + Date, data=dat,
+        sum, na.action=stats::na.omit)
       dat$HourP <- round((dat$Hour/sum(dat$Hour))*100, 1)
       dat 
   }
@@ -134,12 +133,12 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
 
   calcMonth <- function(day_file) {
     dat <- readCSV(day_file)
-    dat <- subset(dat, format(Date, "%Y")==format(today(), "%Y"))
+    dat <- subset(dat, format(.data$Date, "%Y")==format(today(), "%Y"))
     if (nrow(dat)==0) dat <- data.frame(Date=today(), Hour=0)
     # R defines first week as week 0
     dat$Week <- as.numeric(format(dat$Date, "%U")) + 1
     dat <- dat[which(dat$Date > (today()-28)), ]
-    dat <- aggregate(Hour ~ Week, data=dat, sum)
+    dat <- stats::aggregate(Hour ~ Week, data=dat, sum)
     if(nrow(dat)<4) {
       firstMnth <- min(dat$Week)
       dat4 <- data.frame(Week = c(firstMnth:(firstMnth+3)))
@@ -261,7 +260,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
       if(nrow(dat)==0) {
         Hour <- 0 
       } else {
-        Hour <- aggregate(Hour ~ Date, dat, sum)$Hour
+        Hour <- stats::aggregate(Hour ~ Date, dat, sum)$Hour
       }
       if (isToday==TRUE) {
         DayData$Hour[DayData$Date==today()] <- Hour
@@ -353,7 +352,7 @@ sp_env <- new.env(parent = emptyenv())
 today <- function() as.Date(Sys.time())
 
 readCSV <- function(day_file) {
-  dat <- suppressMessages(read_csv(day_file))
+  dat <- suppressMessages(readr::read_csv(day_file))
   if (class(dat$Date)=="Date") {
     return(dat)
   } else if (class(dat$Date)=="character"){
@@ -402,7 +401,7 @@ success_plot <- function(
   } else {
     if (is.null(Year)) Year <- as.integer(format(today(), "%Y"))
     dat <- dat[dat$Years==Year, ]
-    adat <- aggregate(Hour ~ Month, data=dat, FUN=sum) 
+    adat <- stats::aggregate(Hour ~ Month, data=dat, FUN=sum) 
     adat <- base::merge(adat, Labs, by = "Month")
     dev.new(width=7, height=7, unit="in")
     xx = with(adat, barplot(Hour, names.arg=MonthLab, 
@@ -417,16 +416,18 @@ success_plot <- function(
 #' 
 #' @description  Plots the amount of time you have worked each month by year.
 #' 
+#' @param dat Data from 
 #' @param Lab Argument received from success_plot()
 #'
 #' @import dplyr 
+#' @keywords internal 
 
 byYearFun <- function(dat, Lab=NULL) {
-  dat <- group_by(dat, Years, Month) %>% 
-    summarize(Total = sum(Hour))
-  dat <- arrange(dat, Month, Years)
+  dat <- group_by(dat, .data$Years, .data$Month) %>% 
+    summarize(Total = sum(.data$Hour))
+  dat <- arrange(dat, .data$Month, .data$Years)
   dat <- left_join(dat, Lab, by="Month")
-  dat <- reshape(as.data.frame(dat), v.names="Total", idvar = "Month", 
+  dat <- stats::reshape(as.data.frame(dat), v.names="Total", idvar = "Month", 
     timevar="Years", direction="wide")
   rownames(dat) <- dat$MonthLab
   dat <- t(dat[, -c(1, 2)])
@@ -446,7 +447,7 @@ byYearFun <- function(dat, Lab=NULL) {
 #' @param data_path Path to your DayData.csv file. The default is 
 #' Sys.getenv("R_SUCCESS"), "DayData.csv")
 #'
-#' @return 
+#' @return data.frame
 #'
 #' @export 
 load_daydata <- function(
@@ -455,8 +456,8 @@ load_daydata <- function(
     stop("You must set the R_SUCCESS environment variable to your data")
   dat <- readCSV(data_path)
   dat <- dplyr::mutate(dat, 
-    Year = as.integer(format(Date, "%Y")),
-    Month = as.integer(format(Date, "%m")))
+    Year = as.integer(format(.data$Date, "%Y")),
+    Month = as.integer(format(.data$Date, "%m")))
   dat
 }
 
@@ -469,8 +470,6 @@ load_daydata <- function(
 #' @param more_than A vector of integers to report number of days worker for more than x
 #' hours. 
 #' 
-#' @return 
-#'
 #' @export 
 
 success_summary <- function(year=NULL, more_than=c(3, 5)) {
@@ -490,7 +489,7 @@ success_summary <- function(year=NULL, more_than=c(3, 5)) {
     }
   }
   getDat <- function(iyear) {
-    dat <- dplyr::filter(dat, Year == iyear)
+    dat <- dplyr::filter(dat, .data$Year == iyear)
     sum_hour <- round(sum(dat$Hour, na.rm=TRUE))
     days <- as.numeric(format(Sys.time(), "%j"))
     if (iyear == as.integer(format(Sys.time(), "%Y"))) {

@@ -4,15 +4,14 @@
 \alias{load_daydata}
 \title{load_daydata}
 \usage{
-load_daydata(data_path = file.path(Sys.getenv("R_SUCCESS"),
-  "DayData.csv"))
+load_daydata(data_path = file.path(Sys.getenv("R_SUCCESS"), "DayData.csv"))
 }
 \arguments{
 \item{data_path}{Path to your DayData.csv file. The default is 
 Sys.getenv("R_SUCCESS"), "DayData.csv")}
 }
 \value{
-
+data.frame
 }
 \description{
 Load the DayData.csv dataset.

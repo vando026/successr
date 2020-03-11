@@ -2,15 +2,24 @@
 % Please edit documentation in R/SuccessPlan.R
 \name{success_plot}
 \alias{success_plot}
-\title{Plot work hours for the year}
+\title{success_plot}
 \usage{
-success_plot(data_path = file.path(Sys.getenv("R_SUCCESS"),
-  "DayData.csv"), Year = NULL)
+success_plot(
+  data_path = file.path(Sys.getenv("R_SUCCESS"), "DayData.csv"),
+  Year = NULL
+)
 }
 \arguments{
 \item{data_path}{Path to your DayData.csv file. The default is 
 Sys.getenv("R_SUCCESS"), "DayData.csv")}
+
+\item{Year}{The default is to plot the data for the current year if data exists for
+less than one year. If there is more than one year of data, then all years are plotted
+by month. Plot the data by a single year by providing a numberic value.}
 }
 \description{
 Plots the amount of time you have worked each month for the year.
+}
+\examples{
+success_plot(Year=2019)
 }
