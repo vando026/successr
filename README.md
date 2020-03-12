@@ -27,14 +27,17 @@ can be changed in the config.yml file. But don't waste time doing this, just use
 default settings.  
 
 Install using the  `remotes` package:  `remotes::install_github("vando026/successr")`.
-`successr` also requires an installation of the GTK library. The GTK library is
-included in the `RGtk2` package when you install `successr`. But you have to add it to the
-path environment variable. On Windows, the path that you have to add should look something like this:
+`successr` also requires an installation of the GTK library. The GTK library is included
+in the `RGtk2` package when you install `successr`. But you have to add it to the path
+environment variable. On Windows, the path that you have to add should look something like
+this:
 
 `C:/PathToYourRLibrary/3.X/RGtk2/gtk/x64/bin`
 
 To understand how to add to the path environmen variable, see
-[](https://helpdeskgeek.com/windows-10/add-windows-path-environment-variable/)
+
+<https://helpdeskgeek.com/windows-10/add-windows-path-environment-variable/>
+
 You will have to waste some time doing this.
 
 <p></p>
