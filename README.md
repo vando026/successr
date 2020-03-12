@@ -35,9 +35,7 @@ this:
 `C:/PathToYourRLibrary/3.X/RGtk2/gtk/x64/bin`
 
 To understand how to add to the path environmen variable, see
-
-<https://helpdeskgeek.com/windows-10/add-windows-path-environment-variable/>
-
+<https://helpdeskgeek.com/windows-10/add-windows-path-environment-variable/>.
 You will have to waste some time doing this.
 
 <p></p>
