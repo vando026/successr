@@ -8,4 +8,4 @@ Author: Alain Vandormael <albundy79@gmail.com>
 Maintainer: Alain Vandormael <albundy79@gmail.com>
 Encoding: UTF-8
 RoxygenNote: 7.0.2
-Imports: config, stats, memoise, RGtk2, gWidgets2, digest, gWidgets2RGtk2 (>= 1.0-6), readr, dplyr
+Imports: config, memoise, RGtk2, gWidgets2, digest, gWidgets2RGtk2 (>= 1.0-6), readr, dplyr

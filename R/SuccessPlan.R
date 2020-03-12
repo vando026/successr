@@ -133,7 +133,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
 
   calcMonth <- function(day_file) {
     dat <- readCSV(day_file)
-    dat <- subset(dat, format(.data$Date, "%Y")==format(today(), "%Y"))
+    dat <- dplyr::filter(dat, format(.data$Date, "%Y")==format(today(), "%Y"))
     if (nrow(dat)==0) dat <- data.frame(Date=today(), Hour=0)
     # R defines first week as week 0
     dat$Week <- as.numeric(format(dat$Date, "%U")) + 1
