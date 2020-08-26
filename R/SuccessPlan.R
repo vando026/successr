@@ -15,7 +15,7 @@
 #' Clicking \code{Project 1}, \code{Project 2}, and \code{Wasted Time} starts the timer,
 #' and \code{Stop} stops the timer. \code{Report} gives a daily, weekly, monthly breakdown
 #' of work time. \code{Edit} allows you to edit only the time recorded during the day and
-#' the Task (from a drop-down menu).  \code{DayData.csv} allows you to edit the total time
+#' the Task (from a drop-down menu).  \code{DayData.txt} allows you to edit the total time
 #' for a given day (see below). 
 #' 
 #' Upon installation, \code{successr} will setup a data folder (where the data is stored) with a
@@ -69,7 +69,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   ggNames <- unlist(button_labels)
   
   time_file <- file.path(data_path, "TimeSheet.Rdata")
-  day_file <- file.path(data_path, "DayData.csv")
+  day_file <- file.path(data_path, "DayData.txt")
 
   # Create files if they do not exist
   if(!file.exists(time_file)) {
@@ -79,8 +79,8 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
   if(!file.exists(day_file)) {
     DayData <- data.frame(Date=today(), Hour=0)
-    write.csv(DayData, file=file.path(day_file),
-      row.names=FALSE)
+    readr::write_delim(DayData, path=file.path(day_file),
+      col_names=TRUE)
   }
 
   # Shorthand names for GUI setup
@@ -97,7 +97,6 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   asDate <- function(x) {
     as.Date(x, origin="1970-01-01")
   }
- 
 
   # This is the main time calc function
   calcTime <- function(dat) {
@@ -272,8 +271,8 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
         DayData <-  rbind(DayData, newLine) 
       } 
     }
-    write.csv(DayData, file=file.path(day_file), 
-      row.names=FALSE)
+    readr::write_delim(DayData, path=file.path(day_file), 
+       col_names=TRUE)
   }
 
   ## LAYOUT 
@@ -348,7 +347,7 @@ sp_env <- new.env(parent = emptyenv())
 today <- function() as.Date(Sys.time())
 
 readCSV <- function(day_file) {
-  dat <- suppressMessages(readr::read_csv(day_file))
+  dat <- suppressMessages(readr::read_table2(day_file))
   if (class(dat$Date)=="Date") {
     return(dat)
   } else if (class(dat$Date)=="character"){
@@ -370,19 +369,19 @@ readCSV <- function(day_file) {
 #' 
 #' @description  Plots the amount of time you have worked each month for the year.
 #' 
-#' @param data_path Path to your DayData.csv file. The default is 
-#' Sys.getenv("R_SUCCESS"), "DayData.csv")
+#' @param data_path Path to your DayData.txt file. The default path is 
+#' \code{Sys.getenv("R_SUCCESS")}.
 #'
 #' @param Year The default is to plot the data for the current year if data exists for
 #' less than one year. If there is more than one year of data, then all years are plotted
-#' by month. Plot the data by a single year by providing a numberic value. 
+#' by month. Plot the data by a single year by providing a numeric value. 
 #' @import dplyr 
 #' @export
 #' @examples
 #' success_plot(Year=2019)
 
 success_plot <- function(
-  data_path=file.path(Sys.getenv("R_SUCCESS"), "DayData.csv"), 
+  data_path=file.path(Sys.getenv("R_SUCCESS"), "DayData.txt"), 
   Year=NULL) {
   if (!file.exists(data_path)) 
     stop("You must set the R_SUCCESS environment variable or provide a file path to the data.")
@@ -438,16 +437,16 @@ byYearFun <- function(dat, Lab=NULL) {
 
 #' @title load_daydata
 #' 
-#' @description Load the DayData.csv dataset.
+#' @description Load the DayData.txt dataset.
 #' 
-#' @param data_path Path to your DayData.csv file. The default path is 
+#' @param data_path Path to your DayData.txt file. The default path is 
 #' \code{Sys.getenv("R_SUCCESS")}.
 #'
 #' @return data.frame
 #'
 #' @export 
 load_daydata <- function(
-  data_path=file.path(Sys.getenv("R_SUCCESS"), "DayData.csv")) {
+  data_path=file.path(Sys.getenv("R_SUCCESS"), "DayData.txt")) {
   if (!file.exists(data_path)) 
     stop("You must set the R_SUCCESS environment variable to your data")
   dat <- readCSV(data_path)

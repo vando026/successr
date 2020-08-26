@@ -5,13 +5,13 @@
 \title{success_plot}
 \usage{
 success_plot(
-  data_path = file.path(Sys.getenv("R_SUCCESS"), "DayData.csv"),
+  data_path = file.path(Sys.getenv("R_SUCCESS"), "DayData.txt"),
   Year = NULL
 )
 }
 \arguments{
-\item{data_path}{Path to your DayData.csv file. The default is 
-Sys.getenv("R_SUCCESS"), "DayData.csv")}
+\item{data_path}{Path to your DayData.txt file. The default path is 
+\code{Sys.getenv("R_SUCCESS")}.}
 
 \item{Year}{The default is to plot the data for the current year if data exists for
 less than one year. If there is more than one year of data, then all years are plotted
