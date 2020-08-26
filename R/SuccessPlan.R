@@ -28,10 +28,6 @@
 #' the \code{Window Title} can be changed in the \code{config.yml} file. But don't
 #' waste time doing this, just use the default settings.  
 #'
-#' Requires \code{GTK} libraries to work that you may (or may not) have to manually install
-#' yourself (which will waste some time). \code{successr} is in the
-#' development phase, please report bugs to me by typing in the \code{R} console
-#' \code{packageDescription("successr")}.
 #'
 #' @param verbose prints out configuration settings.
 #' 
@@ -444,8 +440,8 @@ byYearFun <- function(dat, Lab=NULL) {
 #' 
 #' @description Load the DayData.csv dataset.
 #' 
-#' @param data_path Path to your DayData.csv file. The default is 
-#' Sys.getenv("R_SUCCESS"), "DayData.csv")
+#' @param data_path Path to your DayData.csv file. The default path is 
+#' \code{Sys.getenv("R_SUCCESS")}.
 #'
 #' @return data.frame
 #'
@@ -455,9 +451,6 @@ load_daydata <- function(
   if (!file.exists(data_path)) 
     stop("You must set the R_SUCCESS environment variable to your data")
   dat <- readCSV(data_path)
-  dat <- dplyr::mutate(dat, 
-    Year = as.integer(format(.data$Date, "%Y")),
-    Month = as.integer(format(.data$Date, "%m")))
   dat
 }
 
@@ -474,6 +467,9 @@ load_daydata <- function(
 
 success_summary <- function(year=NULL, more_than=c(3, 5)) {
   dat <- load_daydata()
+  dat <- dplyr::mutate(dat, 
+    Year = as.integer(format(.data$Date, "%Y")),
+    Month = as.integer(format(.data$Date, "%m")))
   if (is.null(year)) year <- unique(dat$Year)
   stopifnot(more_than %in% 0:24) 
   lft <- "|"
