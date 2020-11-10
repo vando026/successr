@@ -15,7 +15,7 @@ success_plot(
 
 \item{Year}{The default is to plot the data for the current year if data exists for
 less than one year. If there is more than one year of data, then all years are plotted
-by month. Plot the data by a single year by providing a numberic value.}
+by month. Plot the data by a single year by providing a numeric value.}
 }
 \description{
 Plots the amount of time you have worked each month for the year.

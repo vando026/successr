@@ -39,7 +39,6 @@
 #' @import grDevices 
 #' @import graphics 
 #' @import utils 
-#' @import readr 
 #' 
 #' @export
 
@@ -79,8 +78,8 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
   }
   if(!file.exists(day_file)) {
     DayData <- data.frame(Date=today(), Hour=0)
-    readr::write_delim(DayData, path=file.path(day_file),
-      col_names=TRUE)
+    write.table(DayData, file=file.path(day_file),
+      col.names=TRUE, row.names=FALSE, sep=",")
   }
 
   # Shorthand names for GUI setup
@@ -271,8 +270,8 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
         DayData <-  rbind(DayData, newLine) 
       } 
     }
-    readr::write_delim(DayData, path=file.path(day_file), 
-       col_names=TRUE)
+    write.table(DayData, file=file.path(day_file), 
+       col.names=TRUE, row.names=FALSE, sep=",")
   }
 
   ## LAYOUT 
@@ -347,21 +346,18 @@ sp_env <- new.env(parent = emptyenv())
 today <- function() as.Date(Sys.time())
 
 readCSV <- function(day_file) {
-  dat <- suppressMessages(readr::read_table2(day_file))
-  if (class(dat$Date)=="Date") {
-    return(dat)
-  } else if (class(dat$Date)=="character"){
-    f1 <- "%d/%m/%Y"
-    if (!is.na(as.Date(dat$Date[1], f1))) {
-      dat$Date <- as.Date(dat$Date, format=f1) 
+  dat <- read.delim(day_file, sep=",")
+  if (class(dat$Date)=="character"){
+    if (!is.na(as.Date(dat$Date[1]))) {
+      dat$Date <- as.Date(dat$Date) 
       return(dat)
     } else {
+      f1 <- "%Y-%m-%d"
       stop(paste("All dates in", day_file, 
-      "must be in either %Y-%m-%d, %Y/%m/%d or", f1, "format."))  
+      "must be in ", f1, "format."))
     }
   } else {
-   stop(paste("Dates in", day_file, 
-    "must be in character or date format."))  
+   stop(paste("Dates in", day_file, "must be in character format."))
  }
 }
 
