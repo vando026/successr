@@ -14,7 +14,7 @@ success.[<sup>1</sup>](https://www.amazon.com/Getting-Things-Done-ABCs-Managemen
 Clicking _Project 1_, _Project 2_, and _Wasted Time_ starts the timer,
 and _Stop_ stops the timer. _Report_ gives a daily, weekly, monthly breakdown
 of work time. _Edit_ allows you to edit only the time recorded during the day and
-the Task (from a drop-down menu). DayData.csv allows you to edit the total time
+the Task (from a drop-down menu). DayData.txt allows you to edit the total time
 for a given day (see below). 
 
 Upon installation, successr will setup a data folder (where the data is stored) with a
