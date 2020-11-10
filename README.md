@@ -40,7 +40,7 @@ environment variable if you get an error. On Windows, the path that you have to 
 
 To understand how to add to the path environmen variable, see
 <https://helpdeskgeek.com/windows-10/add-windows-path-environment-variable/>.
-You will have to waste some time doing this.
+You may have to waste some time doing this.
 
 <p></p>
 
