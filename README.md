@@ -32,10 +32,9 @@ After installation, type in `R`:
 
 `successr::successr()`
 
-`successr` also requires an installation of the GTK library. The GTK library is included
-in the `RGtk2` package when you install `successr`. But you have to add it to the path
-environment variable. On Windows, the path that you have to add should look something like
-this:
+`successr` requires the GTK library. The GTK library is included
+in the `RGtk2` package when you install `successr`. But you may have to add it to the path
+environment variable if you get an error. On Windows, the path that you have to add should look something like this:
 
 `C:/PathToYourRLibrary/3.X/RGtk2/gtk/x64/bin`
 
