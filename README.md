@@ -56,6 +56,7 @@ To understand how to add to the path environmen variable, see
 ### Linux (Ubuntu): 
 
 You may need to install:
+
 `sudo apt-get install gtk2.0'
 
 `sudo apt-get install build-essential libgtk2.0-dev`
