@@ -501,7 +501,7 @@ success_summary <- function(year=NULL, more_than=c(3, 5)) {
     lapply(more_than, mfun1)
   }
   cat("\n")
-  cat(paste(rep("-", 32), collapse=""), "\n")
+  cat(paste(rep("-", 33), collapse=""), "\n")
   for (i in year) getDat(i)
-  cat(paste(rep("-", 32), collapse=""), "\n")
+  cat(paste(rep("-", 33), collapse=""), "\n")
 }
