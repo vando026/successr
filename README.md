@@ -42,7 +42,7 @@ After installation, type in `R`:
 
 ## Installation notes 
 
-`successr` requires the GTK library, which you may have to spend some time on. 
+`successr` requires the GTK library. You may have to waste some time doing this.
 
 ### Windows:
 
@@ -52,13 +52,14 @@ The GTK library is included in the `RGtk2` package when you install `successr`. 
 
 To understand how to add to the path environmen variable, see
 <https://helpdeskgeek.com/windows-10/add-windows-path-environment-variable/>.
-You may have to waste some time doing this.
 
 ### Linux (Ubuntu): 
 
-You may need to install
+You may need to install:
 `sudo apt-get install gtk2.0'
+
 `sudo apt-get install build-essential libgtk2.0-dev`
+
 `sudo apt install libcanberra-gtk-module`
 
 ### Mac OS
