@@ -32,25 +32,6 @@ After installation, type in `R`:
 
 `successr::successr()`
 
-`successr` requires the GTK library. 
-
-Windows help:
-
-The GTK library is included
-in the `RGtk2` package when you install `successr`. But you may have to add it to the path environment variable if you get an error. On Windows, the path that you have to add should look something like this:
-
-`C:/PathToYourRLibrary/3.X/RGtk2/gtk/x64/bin`
-
-To understand how to add to the path environmen variable, see
-<https://helpdeskgeek.com/windows-10/add-windows-path-environment-variable/>.
-You may have to waste some time doing this.
-
-Linux (Ubuntu) help: You may need to install
-`
-sudo apt-get install gtk2.0
-sudo apt-get install build-essential libgtk2.0-dev
-sudo apt install libcanberra-gtk-module 
-`
 
 <p></p>
 
@@ -58,3 +39,27 @@ sudo apt install libcanberra-gtk-module
 <!-- ![snapshot](snapshot.JPG) -->
 <!-- ![snapshot](snapshot2.JPG) -->
 
+
+## Installation notes 
+
+`successr` requires the GTK library, which you may have to spend some time on. 
+
+### Windows:
+
+The GTK library is included in the `RGtk2` package when you install `successr`. But you may have to add it to the path environment variable if you get an error. On Windows, the path that you have to add should look something like this:
+
+`C:/PathToYourRLibrary/4.X/RGtk2/gtk/x64/bin`
+
+To understand how to add to the path environmen variable, see
+<https://helpdeskgeek.com/windows-10/add-windows-path-environment-variable/>.
+You may have to waste some time doing this.
+
+### Linux (Ubuntu): 
+
+You may need to install
+`sudo apt-get install gtk2.0'
+`sudo apt-get install build-essential libgtk2.0-dev`
+`sudo apt install libcanberra-gtk-module`
+
+### Mac OS
+No successful installation reported on a Mac yet.
