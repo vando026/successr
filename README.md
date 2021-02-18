@@ -57,11 +57,11 @@ To understand how to add to the path environmen variable, see
 
 You may need to install:
 
-`sudo apt-get install gtk2.0'
-
-`sudo apt-get install build-essential libgtk2.0-dev`
-
-`sudo apt install libcanberra-gtk-module`
+```
+sudo apt-get install gtk2.0
+sudo apt-get install build-essential libgtk2.0-dev 
+sudo apt install libcanberra-gtk-module 
+```
 
 ### Mac OS
 No successful installation reported on a Mac yet.
