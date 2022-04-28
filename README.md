@@ -42,7 +42,7 @@ After installation, type in `R`:
 
 ## Installation notes 
 
-`successr` requires the GTK library. You may have to waste some time doing this.
+`successr` requires the GTK library. You may have to waste some time setting this up.
 
 ### Windows:
 

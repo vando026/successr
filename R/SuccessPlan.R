@@ -93,9 +93,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     sprintf("%.1d:%.02d", x %/% 1, ifelse(Min==60, 59, Min))
   }
 
-  asDate <- function(x) {
-    as.Date(x, origin="1970-01-01")
-  }
+  
 
   # This is the main time calc function
   calcTime <- function(dat) {
@@ -343,13 +341,16 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
 }
 sp_env <- new.env(parent = emptyenv())
 
-today <- function() as.Date(Sys.time())
+asDate <- function(x) 
+  as.Date(x, origin="1970-01-01", tz = Sys.timezone(location = TRUE))
+
+today <- function() asDate(Sys.time())
 
 readCSV <- function(day_file) {
   dat <- read.delim(day_file, sep=",")
   if (class(dat$Date)=="character"){
-    if (!is.na(as.Date(dat$Date[1]))) {
-      dat$Date <- as.Date(dat$Date) 
+    if (!is.na(asDate(dat$Date[1]))) {
+      dat$Date <- asDate(dat$Date) 
       return(dat)
     } else {
       f1 <- "%Y-%m-%d"
