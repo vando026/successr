@@ -56,7 +56,8 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
       '".\n See the help file to change default settings. ')) 
   } else if (env_path != "") {
     data_path <- env_path
-    if (!dir.exists(data_path)) dir.create(data_path)
+    if (!dir.exists(data_path)) 
+      dir.create(data_path)
   }
 
   # Get configuration settings
@@ -103,8 +104,10 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
       dat$Hour <- as.numeric(difftime(dat$Time2,dat$Time, units='hours'))
       dat$Date <- asDate(dat$Time)
       dat <- dat[which(dat$Hour>=0 & dat$Task!="Stop"), ]
-      if(nrow(dat)==0 || (nrow(dat)==1 & is.na(dat$Hour)))  
+      # This is needed for the first time initialising TimeSheet
+      if(nrow(dat)==0 || (nrow(dat)==1 & is.na(dat$Hour[1])))  {
         return(NULL)
+      }
       dat <- stats::aggregate(Hour ~ Task + Date, data=dat,
         sum, na.action=stats::na.omit)
       dat$HourP <- round((dat$Hour/sum(dat$Hour))*100, 1)
