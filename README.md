@@ -45,7 +45,8 @@ After installation, type in `R`:
 # Update
 Unfortunately, dependency packages such as `RGtk2` and `gWidgetsRGtk2` have been
 archived on the CRAN repo, making it difficult to install `successr`. Plans are to waste
-further time porting this project to `python`. 
+further time porting this project to `python`. Development on the `R` version of this
+project is therefore deprecated. 
 
 `successr` requires the GTK library. You may have to waste some time setting this up.
 
