@@ -42,6 +42,8 @@ After installation, type in `R`:
 
 ## Installation notes 
 
+(May 17, 2022)
+
 Unfortunately, dependency packages such as `RGtk2` and `gWidgetsRGtk2` have been
 archived on the CRAN repo, making it difficult to install `successr`. Plans are to waste
 further time porting this project to `python`. The `R` version of this
