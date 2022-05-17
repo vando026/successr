@@ -191,7 +191,7 @@ successr <- function(verbose=FALSE, sanitize=FALSE) {
     sapply(button_i, function(i) {
       ii <- base::get(i, envir=environment())
       font(ii) <- list(weight="normal", size=10, color="black")})
-    if(h$action!="Stop")  
+    if(h$action != "Stop")  
       font(h$obj) <- list(weight="bold", size=12, color="red")
      
     # Calc and Write time 

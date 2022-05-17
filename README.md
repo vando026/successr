@@ -42,6 +42,11 @@ After installation, type in `R`:
 
 ## Installation notes 
 
+# Update
+Unfortunately, dependency packages such as `RGtk2` and `gWidgetsRGtk2` have been
+archived on the CRAN repo, making it difficult to install `successr`. Plans are to waste
+further time porting this project to `python`. 
+
 `successr` requires the GTK library. You may have to waste some time setting this up.
 
 ### Windows:
@@ -64,4 +69,4 @@ sudo apt install libcanberra-gtk-module
 ```
 
 ### Mac OS
-No successful installation reported on a Mac yet.
+Installation on a Mac unsuccessful. 
