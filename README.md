@@ -42,32 +42,8 @@ After installation, type in `R`:
 
 ## Installation notes 
 
-# Update
 Unfortunately, dependency packages such as `RGtk2` and `gWidgetsRGtk2` have been
 archived on the CRAN repo, making it difficult to install `successr`. Plans are to waste
-further time porting this project to `python`. Development on the `R` version of this
+further time porting this project to `python`. The `R` version of this
 project is therefore deprecated. 
 
-`successr` requires the GTK library. You may have to waste some time setting this up.
-
-### Windows:
-
-The GTK library is included in the `RGtk2` package when you install `successr`. But you may have to add it to the path environment variable if you get an error. On Windows, the path that you have to add should look something like this:
-
-`C:/PathToYourRLibrary/4.X/RGtk2/gtk/x64/bin`
-
-To understand how to add to the path environmen variable, see
-<https://helpdeskgeek.com/windows-10/add-windows-path-environment-variable/>.
-
-### Linux (Ubuntu): 
-
-You may need to install:
-
-```
-sudo apt-get install gtk2.0
-sudo apt-get install build-essential libgtk2.0-dev 
-sudo apt install libcanberra-gtk-module 
-```
-
-### Mac OS
-Installation on a Mac unsuccessful. 
